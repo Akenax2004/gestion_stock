@@ -35,13 +35,13 @@ Follow these steps to set up the project locally:
 1. **Clone the repository:**
 
     ```bash
-    git clone https://github.com/fajarghifar/inventory-management-system
+    git clone https://github.com/Akenax2004/gestion_stock
     ```
 
 2. **Navigate to the project folder:**
 
     ```bash
-    cd inventory-management-system
+    cd gestion_stock
     ```
 
 3. **Install PHP dependencies:**
