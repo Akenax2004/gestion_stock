@@ -127,11 +127,7 @@
                 </th>
                 <td class="text-center">
 {{--                    ${{ number_format($subtotal, 2) }}--}}
-<<<<<<< HEAD
-                    {{ Number::currency($subtotal, 'XOF') }}
-=======
                     {{ Number::currency($subtotal, 'EUR') }}
->>>>>>> 58826724be3ba47de5bcd3dd0e3d1def8e583f42
                 </td>
             </tr>
             <tr>
@@ -154,11 +150,7 @@
                     Total
                 </th>
                 <td class="text-center">
-<<<<<<< HEAD
-                    {{ Number::currency($total, 'XOF') }}
-=======
                     {{ Number::currency($total, 'EUR') }}
->>>>>>> 58826724be3ba47de5bcd3dd0e3d1def8e583f42
                     <input type="hidden" name="total_amount" value="{{ $total }}">
                 </td>
             </tr>
