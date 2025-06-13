@@ -4,7 +4,11 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
+<<<<<<< HEAD
+        <title>KnowStock</title>
+=======
         <title>Laravel</title>
+>>>>>>> 58826724be3ba47de5bcd3dd0e3d1def8e583f42
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">

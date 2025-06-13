@@ -16,7 +16,11 @@
                 <ul class="list-inline list-inline-dots mb-0">
                     <li class="list-inline-item">
                         Copyright &copy; <script>document.write(new Date().getFullYear())</script>
+<<<<<<< HEAD
+                        <a href="#" class="link-secondary">KnowStock</a>.
+=======
                         <a href="#" class="link-secondary">Tabler</a>.
+>>>>>>> 58826724be3ba47de5bcd3dd0e3d1def8e583f42
                         All rights reserved.
                     </li>
                 </ul>
