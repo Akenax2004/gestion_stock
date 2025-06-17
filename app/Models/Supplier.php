@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
+
 class Supplier extends Model
 {
     use HasFactory;
@@ -26,6 +27,7 @@ class Supplier extends Model
         'account_holder',
         'account_number',
         'bank_name',
+        'company_id', // AJOUTEZ CETTE LIGNE
     ];
 
     protected $casts = [
@@ -46,5 +48,10 @@ class Supplier extends Model
             ->orWhere('phone', 'like', "%{$value}%")
             ->orWhere('shopname', 'like', "%{$value}%")
             ->orWhere('type', 'like', "%{$value}%");
+    }
+
+    public function companies(): HasMany
+    {
+        return $this->hasMany(Company::class);
     }
 }

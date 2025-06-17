@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class OrderDetails extends Model
 {
@@ -17,6 +18,7 @@ class OrderDetails extends Model
         'quantity',
         'unitcost',
         'total',
+        'company_id', // AJOUTEZ CETTE LIGNE
     ];
 
     protected $casts = [
@@ -34,5 +36,10 @@ class OrderDetails extends Model
     public function order(): BelongsTo
     {
         return $this->belongsTo(Order::class);
+    }
+
+     public function companies(): HasMany
+    {
+        return $this->hasMany(Company::class);
     }
 }

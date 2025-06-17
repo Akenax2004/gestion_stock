@@ -19,6 +19,7 @@ class Category extends Model
         'slug',
         'short_code',
         'user_id',
+        'company_id', // AJOUTEZ CETTE LIGNE
     ];
 
     protected $casts = [
@@ -40,5 +41,9 @@ class Category extends Model
     public function getRouteKeyName(): string
     {
         return 'slug';
+    }
+    public function companies(): HasMany
+    {
+        return $this->hasMany(Company::class);
     }
 }

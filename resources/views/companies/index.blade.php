@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="fr"> <!-- Langue définie en français, vous pouvez la rendre dynamique si besoin -->
+<html lang="fr">
 <head>
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
@@ -209,7 +209,8 @@
                         @foreach($companies as $company)
                             <tr>
                                 <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                                    <a href="{{ route('dashboard', $company) }}"> {{-- Nouveau lien pour le dashboard --}}
+                                    {{-- CORRIGÉ : Le lien doit appeler companies.select --}}
+                                    <a href="{{ route('companies.select', $company->id) }}">
                                         @if($company->logo)
                                             <img src="{{ asset('storage/companies/logos/' . $company->logo) }}" alt="{{ $company->name ?? 'Logo' }}" class="w-10 h-10 rounded-full object-cover">
                                         @else
@@ -218,7 +219,8 @@
                                     </a>
                                 </td>
                                 <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                                    <a href="{{ route('dashboard', $company) }}" class="text-blue-600 hover:text-blue-900 font-semibold"> {{-- Nouveau lien pour le dashboard --}}
+                                    {{-- CORRIGÉ : Le lien doit appeler companies.select --}}
+                                    <a href="{{ route('companies.select', $company->id) }}" class="text-blue-600 hover:text-blue-900 font-semibold">
                                         <p class="text-gray-900 whitespace-no-wrap">{{ $company->name ?? '' }}</p>
                                     </a>
                                 </td>

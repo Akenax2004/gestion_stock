@@ -5,6 +5,7 @@ namespace App\Models;
 use Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class QuotationDetails extends Model
 {
@@ -19,7 +20,8 @@ class QuotationDetails extends Model
         'sub_total',
         'product_discount_amount',
         'product_discount_type',
-        'product_tax_amount'
+        'product_tax_amount',
+        'company_id', // AJOUTEZ CETTE LIGNE
     ];
 
     protected $with = ['product'];
@@ -78,5 +80,9 @@ class QuotationDetails extends Model
             get: fn ($value) => $value / 100,
             set: fn ($value) => $value * 100,
         );
+    }
+    public function companies(): HasMany
+    {
+        return $this->hasMany(Company::class);
     }
 }

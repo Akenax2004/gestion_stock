@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Product extends Model
 {
@@ -31,6 +32,7 @@ class Product extends Model
         'created_at',
         'updated_at',
         'user_id',
+        'company_id', // AJOUTEZ CETTE LIGNE
     ];
 
     protected $casts = [
@@ -74,5 +76,10 @@ class Product extends Model
     {
         $query->where('name', 'like', "%{$value}%")
             ->orWhere('code', 'like', "%{$value}%");
+    }
+
+    public function companies(): HasMany
+    {
+        return $this->hasMany(Company::class);
     }
 }

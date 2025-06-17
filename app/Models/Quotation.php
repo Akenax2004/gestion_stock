@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+
 class Quotation extends Model
 {
     protected $fillable = [
@@ -26,6 +27,7 @@ class Quotation extends Model
         'created_at',
         'updated_at',
         'user_id',
+        'company_id', // AJOUTEZ CETTE LIGNE
     ];
 
     protected $casts = [
@@ -93,5 +95,9 @@ class Quotation extends Model
         $query->where('reference', 'like', "%{$value}%")
             ->orWhere('customer_name', 'like', "%{$value}%")
             ->orWhere('status', 'like', "%{$value}%");
+    }
+    public function companies(): HasMany
+    {
+        return $this->hasMany(Company::class);
     }
 }

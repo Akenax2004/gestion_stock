@@ -2,63 +2,79 @@
 
 namespace App\Http\Requests\Customer;
 
-use Illuminate\Validation\Rule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Auth;    // NOUVEAU : Importez la façade Auth
+use Illuminate\Validation\Rule;         // NOUVEAU : Importez Rule pour des règles uniques plus complexes
+use Illuminate\Support\Facades\Session; // NOUVEAU : Importez la façade Session
 
 class UpdateCustomerRequest extends FormRequest
 {
     /**
-     * Determine if the user is authorized to make this request.
+     * Détermine si l'utilisateur est autorisé à effectuer cette requête.
+     * L'autorisation doit être basée sur l'authentification, la sélection d'une entreprise active,
+     * et la propriété du client par l'utilisateur dans l'entreprise active.
      */
     public function authorize(): bool
     {
-        return true;
+        // L'utilisateur doit être connecté
+        // Une entreprise active doit être sélectionnée en session
+        // Le client en cours de modification doit appartenir à l'utilisateur connecté ET à l'entreprise active
+        return Auth::check() && Session::has('active_company_id') &&
+               $this->route('customer')->user_id === Auth::id() &&
+               $this->route('customer')->company_id === Session::get('active_company_id');
     }
 
     /**
-     * Get the validation rules that apply to the request.
+     * Obtient les règles de validation qui s'appliquent à la requête.
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array|string>
      */
     public function rules(): array
     {
+        $customerId = $this->route('customer')->id; // Récupère l'ID du client depuis la route
+        $userId = Auth::id();
+        $activeCompanyId = Session::get('active_company_id');
+
         return [
-            'photo' => [
-                'image',
-                'file',
-                'max:1024'
-            ],
-            'name' => [
-                'required',
-                'string',
-                'max:50'
-            ],
+            'photo' => 'nullable|image|file|max:1024',
+            'name' => 'required|string|max:50',
             'email' => [
                 'required',
                 'email',
                 'max:50',
-                Rule::unique('customers', 'email')->ignore($this->customer)
+                // L'email doit être unique pour cet 'user_id' ET ce 'company_id',
+                // tout en ignorant l'enregistrement du client actuel ($customerId)
+                Rule::unique('customers')->where(function ($query) use ($userId, $activeCompanyId) {
+                    return $query->where('user_id', $userId)
+                                 ->where('company_id', $activeCompanyId);
+                })->ignore($customerId),
             ],
             'phone' => [
                 'required',
                 'string',
                 'max:25',
-                Rule::unique('customers', 'phone')->ignore($this->customer),
+                // Le téléphone doit être unique pour cet 'user_id' ET ce 'company_id',
+                // tout en ignorant l'enregistrement du client actuel ($customerId)
+                Rule::unique('customers')->where(function ($query) use ($userId, $activeCompanyId) {
+                    return $query->where('user_id', $userId)
+                                 ->where('company_id', $activeCompanyId);
+                })->ignore($customerId),
             ],
-            'account_holder' => [
-                'max:50'
-            ],
-            'account_number' => [
-                'max:25'
-            ],
-            'bank_name' => [
-                'max:25'
-            ],
-            'address' => [
-                'required',
-                'string',
-                'max:100'
-            ],
+            'account_holder' => 'nullable|string|max:50',
+            'account_number' => 'nullable|string|max:25',
+            'bank_name' => 'nullable|string|max:25',
+            'address' => 'required|string|max:100',
+        ];
+    }
+
+    /**
+     * Personnalise les messages d'erreur de validation (facultatif).
+     */
+    public function messages(): array
+    {
+        return [
+            'email.unique' => 'Cet e-mail de client existe déjà pour votre entreprise.',
+            'phone.unique' => 'Ce numéro de téléphone de client existe déjà pour votre entreprise.',
         ];
     }
 }

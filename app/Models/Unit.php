@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
+
 class Unit extends Model
 {
     use HasFactory;
@@ -19,6 +20,7 @@ class Unit extends Model
         'slug',
         'short_code',
         'user_id',
+        'company_id', // AJOUTEZ CETTE LIGNE
     ];
 
     protected $casts = [
@@ -41,5 +43,9 @@ class Unit extends Model
     public function getRouteKeyName(): string
     {
         return 'slug';
+    }
+    public function companies(): HasMany
+    {
+        return $this->hasMany(Company::class);
     }
 }

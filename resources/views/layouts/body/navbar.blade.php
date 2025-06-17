@@ -1,4 +1,3 @@
-
 <header class="navbar-expand-md">
     <div class="collapse navbar-collapse" id="navbar-menu">
         <div class="navbar">
@@ -95,7 +94,7 @@
                     <li class="nav-item dropdown {{ request()->is('suppliers*', 'customers*') ? 'active' : null }}">
                         <a class="nav-link dropdown-toggle" href="#navbar-base" data-bs-toggle="dropdown" data-bs-auto-close="outside" role="button" aria-expanded="false">
                             <span class="nav-link-icon d-md-none d-lg-inline-block">
-                              <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-layers-subtract" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M8 4m0 2a2 2 0 0 1 2 -2h8a2 2 0 0 1 2 2v8a2 2 0 0 1 -2 2h-8a2 2 0 0 1 -2 -2z" /><path d="M16 16v2a2 2 0 0 1 -2 2h-8a2 2 0 0 1 -2 -2v-8a2 2 0 0 1 2 -2h2" /></svg>
+                                 <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-layers-subtract" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M8 4m0 2a2 2 0 0 1 2 -2h8a2 2 0 0 1 2 2v8a2 2 0 0 1 -2 2h-8a2 2 0 0 1 -2 -2z" /><path d="M16 16v2a2 2 0 0 1 -2 2h-8a2 2 0 0 1 -2 -2v-8a2 2 0 0 1 2 -2h2" /></svg>
                             </span>
                             <span class="nav-link-title">
                                 {{ __('Pages') }}
@@ -119,13 +118,13 @@
                         <a class="nav-link dropdown-toggle" href="#navbar-base" data-bs-toggle="dropdown" data-bs-auto-close="outside" role="button" aria-expanded="false">
                             <span class="nav-link-icon d-md-none d-lg-inline-block">
                                 <svg xmlns="http://www.w3.org/2000/svg"
-                                     class="icon icon-tabler icon-tabler-settings"
-                                     width="24"
-                                     height="24"
-                                     viewBox="0 0 24 24"
-                                     stroke-width="2"
-                                     stroke="currentColor"
-                                     fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                    class="icon icon-tabler icon-tabler-settings"
+                                    width="24"
+                                    height="24"
+                                    viewBox="0 0 24 24"
+                                    stroke-width="2"
+                                    stroke="currentColor"
+                                    fill="none" stroke-linecap="round" stroke-linejoin="round">
                                     <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
                                     <path d="M10.325 4.317c.426 -1.756 2.924 -1.756 3.35 0a1.724 1.724 0 0 0 2.573 1.066c1.543 -.94 3.31 .826 2.37 2.37a1.724 1.724 0 0 0 1.065 2.572c1.756 .426 1.756 2.924 0 3.35a1.724 1.724 0 0 0 -1.066 2.573c.94 1.543 -.826 3.31 -2.37 2.37a1.724 1.724 0 0 0 -2.572 1.065c-.426 1.756 -2.924 1.756 -3.35 0a1.724 1.724 0 0 0 -2.573 -1.066c-1.543 .94 -3.31 -.826 -2.37 -2.37a1.724 1.724 0 0 0 -1.065 -2.572c-1.756 -.426 -1.756 -2.924 0 -3.35a1.724 1.724 0 0 0 1.066 -2.573c-.94 -1.543 .826 -3.31 2.37 -2.37c1 .608 2.296 .07 2.572 -1.065z" /><path d="M9 12a3 3 0 1 0 6 0a3 3 0 0 0 -6 0" /></svg>
                             </span>
@@ -150,6 +149,50 @@
                         </div>
                     </li>
 
+                    {{-- NOUVEAU : Menu déroulant pour la sélection de l'entreprise --}}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown" data-bs-auto-close="outside" role="button" aria-expanded="false">
+                            <span class="nav-link-icon d-md-none d-lg-inline-block">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-building-factory" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 21h18" /><path d="M5 21v-12l5 4v-4l5 4v-4l5 4v-4" /><path d="M19 21v-14l-3 -2l-6 2l-3 -2l-4 2" /></svg>
+                            </span>
+                            <span class="nav-link-title">
+                                @if(Session::has('active_company_name'))
+                                    {{ Session::get('active_company_name') }}
+                                @else
+                                    {{ __('Select Company') }}
+                                @endif
+                            </span>
+                        </a>
+                        <div class="dropdown-menu">
+                            <div class="dropdown-menu-columns">
+                                <div class="dropdown-menu-column">
+                                    {{-- Afficher les entreprises de l'utilisateur --}}
+                                    @auth
+                                        @php
+                                            // Récupérer les entreprises de l'utilisateur authentifié
+                                            // Assurez-vous que votre modèle User a une relation hasMany('App\Models\Company')
+                                            $userCompanies = Auth::user()->companies ?? collect();
+                                        @endphp
+                                        @forelse($userCompanies as $company)
+                                            <a class="dropdown-item @if(Session::get('active_company_id') == $company->id) active @endif"
+                                               href="{{ route('companies.select', $company->id) }}">
+                                                {{ $company->name }}
+                                            </a>
+                                        @empty
+                                            <span class="dropdown-item text-muted">{{ __('No companies found.') }}</span>
+                                        @endforelse
+                                        <div class="dropdown-divider"></div>
+                                    @endauth
+                                    <a class="dropdown-item" href="{{ route('companies.create') }}">
+                                        {{ __('Create New Company') }}
+                                    </a>
+                                    <a class="dropdown-item" href="{{ route('companies.index') }}">
+                                        {{ __('Manage Companies') }}
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </li>
                 </ul>
             </div>
         </div>

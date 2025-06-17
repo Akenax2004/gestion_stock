@@ -20,6 +20,7 @@ class Company extends Model
         'vat_number',
         'logo',
         'is_active',
+        'company_id', // AJOUTEZ CETTE LIGNE
     ];
 
     // Définition de la relation avec le modèle User
@@ -35,4 +36,5 @@ class Company extends Model
     // {
     //     return $this->hasMany(Product::class);
     // }
+
 }

@@ -3,42 +3,64 @@
 namespace App\Http\Requests\Unit;
 
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Support\Facades\Auth; // Importez la façade Auth
+use Illuminate\Support\Facades\Auth;    // NOUVEAU : Importez la façade Auth
+use Illuminate\Validation\Rule;         // NOUVEAU : Importez Rule pour des règles uniques plus complexes
+use Illuminate\Support\Facades\Session; // NOUVEAU : Importez la façade Session
 
 class StoreUnitRequest extends FormRequest
 {
     /**
-     * Détermine si l'utilisateur est autorisé à faire cette requête.
+     * Détermine si l'utilisateur est autorisé à effectuer cette requête.
+     * L'autorisation doit être basée sur l'authentification et la sélection d'une entreprise active.
      */
     public function authorize(): bool
     {
-        // L'autorisation est généralement gérée au niveau du contrôleur ou du middleware,
-        // donc nous pouvons laisser ceci à 'true' si le contrôleur est déjà protégé.
-        return Auth::check(); // S'assurer que l'utilisateur est connecté pour autoriser la requête
+        // L'utilisateur doit être connecté ET avoir une entreprise active sélectionnée.
+        return Auth::check() && Session::has('active_company_id');
     }
 
     /**
-     * Récupère les règles de validation qui s'appliquent à la requête.
+     * Obtient les règles de validation qui s'appliquent à la requête.
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array|string>
      */
     public function rules(): array
     {
-        // Récupère l'ID de l'utilisateur connecté pour les règles d'unicité.
-        // Cela permet à chaque utilisateur d'avoir des noms et des slugs d'unité uniques
-        // par rapport à ses PROPRES unités, et non globalement.
         $userId = Auth::id();
+        $activeCompanyId = Session::get('active_company_id');
 
         return [
-            // Le nom doit être unique PAR UTILISATEUR
-            'name' => 'required|string|max:255|unique:units,name,NULL,id,user_id,' . $userId,
-            // Le slug doit être unique PAR UTILISATEUR et au format 'alpha_dash'
-            'slug' => 'required|string|max:255|unique:units,slug,NULL,id,user_id,' . $userId . '|alpha_dash',
-            // 'short_code' était marqué 'required' dans votre version précédente.
-            // Cependant, votre migration 'create_units_table' le définit comme 'nullable()'.
-            // Je l'ai rendu 'nullable' ici pour correspondre au schéma de la base de données.
-            // Si vous souhaitez qu'il soit obligatoire, retirez 'nullable'.
-            'short_code' => 'nullable|string|max:255',
+            'name' => [
+                'required',
+                'string',
+                'max:255',
+                // Le nom doit être unique pour cet 'user_id' ET ce 'company_id'
+                Rule::unique('units')->where(function ($query) use ($userId, $activeCompanyId) {
+                    return $query->where('user_id', $userId)
+                                 ->where('company_id', $activeCompanyId);
+                }),
+            ],
+            'slug' => [
+                'required',
+                'string',
+                'max:255',
+                'alpha_dash',
+                // Le slug doit être unique pour cet 'user_id' ET ce 'company_id'
+                Rule::unique('units')->where(function ($query) use ($userId, $activeCompanyId) {
+                    return $query->where('user_id', $userId)
+                                 ->where('company_id', $activeCompanyId);
+                }),
+            ],
+            'short_code' => [
+                'nullable', // Gardé nullable comme dans votre migration
+                'string',
+                'max:255',
+                // Le short_code doit être unique pour cet 'user_id' ET ce 'company_id'
+                Rule::unique('units')->where(function ($query) use ($userId, $activeCompanyId) {
+                    return $query->where('user_id', $userId)
+                                 ->where('company_id', $activeCompanyId);
+                }),
+            ],
         ];
     }
 
@@ -48,10 +70,10 @@ class StoreUnitRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'name.unique' => 'Ce nom d\'unité existe déjà pour cet utilisateur.',
-            'slug.unique' => 'Ce slug d\'unité existe déjà pour cet utilisateur.',
-            'slug.alpha_dash' => 'Le slug ne peut contenir que des lettres, des chiffres, des tirets et des underscores.',
-            'short_code.required' => 'Le champ code court est obligatoire.', // Si vous le rendez obligatoire
+            'name.unique' => 'Ce nom d\'unité existe déjà pour votre entreprise.',
+            'slug.unique' => 'Ce slug d\'unité existe déjà pour votre entreprise.',
+            'slug.alpha_dash' => 'Le slug ne doit contenir que des lettres, des chiffres, des tirets et des underscores.',
+            'short_code.unique' => 'Ce code court d\'unité existe déjà pour votre entreprise.',
         ];
     }
 }

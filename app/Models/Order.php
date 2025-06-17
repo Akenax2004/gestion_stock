@@ -29,6 +29,7 @@ class Order extends Model
         'pay',
         'due',
         'user_id',
+        'company_id', // AJOUTEZ CETTE LIGNE
     ];
 
     protected $casts = [
@@ -58,5 +59,9 @@ class Order extends Model
         public function user()
     {
         return $this->belongsTo(User::class); // Laravel inférera 'user_id'
+    }
+    public function companies(): HasMany
+    {
+        return $this->hasMany(Company::class);
     }
 }

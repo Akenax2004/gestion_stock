@@ -9,48 +9,56 @@ use App\Models\Order;
 use App\Models\Product;
 use App\Models\Purchase;
 use App\Models\Quotation;
-use Illuminate\Support\Facades\Auth; // Importez la façade Auth
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Session; // Garder Session pour récupérer l'active_company_id
 
 class DashboardController extends Controller
 {
     public function index()
     {
-        // Vérifie si un utilisateur est authentifié
-        if (!Auth::check()) {
-            // Redirige vers la page de connexion si l'utilisateur n'est pas connecté.
-            // Le middleware 'auth' sur la route devrait déjà gérer cela, mais c'est un bon garde-fou.
-            return redirect('/login')->withErrors('Veuillez vous connecter pour accéder au tableau de bord.');
-        }
+        // Le middleware 'auth' garantit que l'utilisateur est connecté.
+        // Le middleware 'company.selected' garantit qu'une entreprise active est en session.
 
-        // Récupère l'ID de l'utilisateur actuellement connecté
         $userId = Auth::id();
+        $activeCompanyId = Session::get('active_company_id');
 
-        // FILTRAGE DES DONNÉES PAR L'UTILISATEUR CONNECTÉ
-        // Assurez-vous que toutes ces tables ont une colonne 'user_id'
-        // et que les modèles Eloquent correspondants ont 'user_id' dans leur propriété $fillable.
+        // Toutes les requêtes sont désormais filtrées par user_id ET active_company_id
+        // grâce aux Global Scopes que vous avez ou devez implémenter sur vos modèles.
+        // Si les Global Scopes ne sont pas encore en place, ajoutez les where clauses ici.
 
-        $orders = Order::where('user_id', $userId)->count();
+        $orders = Order::where('user_id', $userId)
+                       ->where('company_id', $activeCompanyId) // Exemple si Global Scope n'est pas actif partout
+                       ->count();
         $completedOrders = Order::where('user_id', $userId)
-            ->where('order_status', OrderStatus::COMPLETE)
-            ->count();
+                                ->where('company_id', $activeCompanyId)
+                                ->where('order_status', OrderStatus::COMPLETE)
+                                ->count();
 
-        $products = Product::where('user_id', $userId)->count();
+        $products = Product::where('user_id', $userId)
+                           ->where('company_id', $activeCompanyId)
+                           ->count();
 
-        $purchases = Purchase::where('user_id', $userId)->count();
+        $purchases = Purchase::where('created_by', $userId) // created_by pour purchases
+                             ->where('company_id', $activeCompanyId)
+                             ->count();
         $todayPurchases = Purchase::query()
-            ->where('user_id', $userId) // Filtre par utilisateur ici aussi
-            ->where('date', today())
-            ->get()
-            ->count();
+                                  ->where('created_by', $userId)
+                                  ->where('company_id', $activeCompanyId)
+                                  ->whereDate('date', today()) // Utiliser whereDate si 'date' est un datetime
+                                  ->count(); // Utiliser count() au lieu de get()->count() pour l'efficacité
 
-        $categories = Category::where('user_id', $userId)->count();
+        $categories = Category::where('user_id', $userId)
+                               ->where('company_id', $activeCompanyId)
+                               ->count();
 
-        $quotations = Quotation::where('user_id', $userId)->count();
+        $quotations = Quotation::where('user_id', $userId)
+                               ->where('company_id', $activeCompanyId)
+                               ->count();
         $todayQuotations = Quotation::query()
-            ->where('user_id', $userId) // Filtre par utilisateur ici aussi
-            ->where('date', today()->format('Y-m-d'))
-            ->get()
-            ->count();
+                                    ->where('user_id', $userId)
+                                    ->where('company_id', $activeCompanyId)
+                                    ->whereDate('date', today()) // Utiliser whereDate
+                                    ->count(); // Utiliser count()
 
         return view('dashboard', [
             'products' => $products,

@@ -5,22 +5,33 @@ namespace App\Http\Controllers;
 use App\Models\Customer;
 use App\Http\Requests\Customer\StoreCustomerRequest;
 use App\Http\Requests\Customer\UpdateCustomerRequest;
-use Illuminate\Support\Facades\Auth; // N'oubliez pas d'importer la façade Auth
-use Illuminate\Support\Facades\Storage; // Pour gérer la suppression de l'image via Storage
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Session; // NOUVEAU : Importez la façade Session
 
 class CustomerController extends Controller
 {
     /**
-     * Affiche une liste de tous les clients de l'utilisateur connecté.
+     * Affiche une liste de tous les clients de l'utilisateur connecté et de l'entreprise active.
      */
     public function index()
     {
-        // Récupère l'ID de l'utilisateur actuellement connecté.
-        // Puisque la route est sous middleware 'auth', nous savons qu'un utilisateur est connecté.
-        $userId = Auth::id();
+        if (!Auth::check()) {
+            return redirect('/login')->withErrors('Veuillez vous connecter.');
+        }
 
-        // Récupère uniquement les clients appartenant à l'utilisateur connecté
-        $customers = Customer::where('user_id', $userId)->get();
+        $userId = Auth::id();
+        $activeCompanyId = Session::get('active_company_id');
+
+        // Redirige si aucune entreprise n'est sélectionnée
+        if (!$activeCompanyId) {
+            return redirect()->route('companies.index')->withErrors('Veuillez sélectionner une entreprise pour gérer les clients.');
+        }
+
+        // Récupère uniquement les clients appartenant à l'utilisateur connecté ET à l'entreprise active
+        $customers = Customer::where('user_id', $userId)
+                             ->where('company_id', $activeCompanyId) // FILTRAGE PAR ENTREPRISE
+                             ->get();
 
         return view('customers.index', [
             'customers' => $customers
@@ -32,20 +43,41 @@ class CustomerController extends Controller
      */
     public function create()
     {
+        if (!Auth::check()) {
+            return redirect('/login')->withErrors('Veuillez vous connecter.');
+        }
+
+        $activeCompanyId = Session::get('active_company_id');
+
+        // Redirige si aucune entreprise n'est sélectionnée
+        if (!$activeCompanyId) {
+            return redirect()->route('companies.index')->withErrors('Veuillez sélectionner une entreprise avant de créer un client.');
+        }
+
         return view('customers.create');
     }
 
     /**
-     * Stocke un nouveau client dans la base de données, l'associant à l'utilisateur connecté.
+     * Stocke un nouveau client dans la base de données, l'associant à l'utilisateur connecté et à l'entreprise active.
      */
     public function store(StoreCustomerRequest $request)
     {
-        // Récupère l'ID de l'utilisateur connecté pour l'associer au nouveau client.
-        $userId = Auth::id();
+        if (!Auth::check()) {
+            return redirect('/login')->withErrors('Veuillez vous connecter.');
+        }
 
-        // Crée le client en ajoutant l'ID de l'utilisateur.
+        $userId = Auth::id();
+        $activeCompanyId = Session::get('active_company_id');
+
+        // Redirige si aucune entreprise n'est sélectionnée
+        if (!$activeCompanyId) {
+            return redirect()->route('companies.index')->withErrors('Veuillez sélectionner une entreprise avant de créer un client.');
+        }
+
+        // Crée le client en ajoutant l'ID de l'utilisateur et l'ID de l'entreprise active.
         $customer = Customer::create(array_merge($request->validated(), [
             'user_id' => $userId, // Associe le client à l'utilisateur connecté
+            'company_id' => $activeCompanyId, // AJOUT : Associe le client à l'entreprise active
         ]));
 
         /**
@@ -69,18 +101,18 @@ class CustomerController extends Controller
 
     /**
      * Affiche les détails d'un client spécifique.
-     * S'assure que seul le propriétaire peut le voir.
+     * S'assure que seul le propriétaire et l'entreprise active peuvent le voir.
      */
     public function show(Customer $customer)
     {
-        // Vérifie si l'utilisateur connecté est le propriétaire du client.
-        // Si ce n'est pas le cas, renvoie une erreur 403 (Forbidden).
-        if ($customer->user_id !== Auth::id()) {
+        // Vérifie si l'utilisateur connecté est le propriétaire du client ET si elle appartient à l'entreprise active.
+        if (!Auth::check() || $customer->user_id !== Auth::id() || $customer->company_id !== Session::get('active_company_id')) {
             abort(403, 'Accès non autorisé à ce client.');
         }
 
         // Charge les relations 'quotations' et 'orders'.
-        // Le .get() est superflu après loadMissing, car loadMissing retourne l'instance du modèle.
+        // Ces relations devraient être configurées dans le modèle Customer pour également filtrer par company_id
+        // si les données sont sensibles à l'entreprise.
         $customer->loadMissing(['quotations', 'orders']);
 
         return view('customers.show', [
@@ -90,12 +122,12 @@ class CustomerController extends Controller
 
     /**
      * Affiche le formulaire de modification d'un client.
-     * S'assure que seul le propriétaire peut le modifier.
+     * S'assure que seul le propriétaire et l'entreprise active peuvent le modifier.
      */
     public function edit(Customer $customer)
     {
-        // Vérifie si l'utilisateur connecté est le propriétaire du client.
-        if ($customer->user_id !== Auth::id()) {
+        // Vérifie si l'utilisateur connecté est le propriétaire du client ET si elle appartient à l'entreprise active.
+        if (!Auth::check() || $customer->user_id !== Auth::id() || $customer->company_id !== Session::get('active_company_id')) {
             abort(403, 'Accès non autorisé à modifier ce client.');
         }
 
@@ -106,17 +138,19 @@ class CustomerController extends Controller
 
     /**
      * Met à jour un client existant.
-     * S'assure que seul le propriétaire peut le modifier.
+     * S'assure que seul le propriétaire et l'entreprise active peuvent le modifier.
      */
     public function update(UpdateCustomerRequest $request, Customer $customer)
     {
-        // Vérifie si l'utilisateur connecté est le propriétaire du client.
-        if ($customer->user_id !== Auth::id()) {
+        // Vérifie si l'utilisateur connecté est le propriétaire du client ET si elle appartient à l'entreprise active.
+        if (!Auth::check() || $customer->user_id !== Auth::id() || $customer->company_id !== Session::get('active_company_id')) {
             abort(403, 'Accès non autorisé à mettre à jour ce client.');
         }
 
-        // Mettre à jour les données du client, en excluant le champ 'photo' pour le moment.
-        $customer->update($request->validated()); // Utilisez $request->validated() si vous utilisez FormRequest
+        // Mettre à jour les données du client.
+        // Les règles d'unicité dans UpdateCustomerRequest devraient être mises à jour pour inclure company_id
+        // Par exemple: 'email' => 'nullable|email|unique:customers,email,' . $customer->id . ',id,company_id,' . Session::get('active_company_id'),
+        $customer->update($request->validated());
 
         if ($request->hasFile('photo')) {
             // Supprimer l'ancienne photo si elle existe
@@ -135,6 +169,11 @@ class CustomerController extends Controller
             $customer->update([
                 'photo' => $fileName
             ]);
+        } elseif ($request->input('photo_removed')) { // Gère la suppression explicite de la photo
+             if ($customer->photo) {
+                Storage::disk('public')->delete('customers/' . $customer->photo);
+                $customer->update(['photo' => null]);
+            }
         }
 
         return redirect()
@@ -144,12 +183,12 @@ class CustomerController extends Controller
 
     /**
      * Supprime un client.
-     * S'assure que seul le propriétaire peut le supprimer.
+     * S'assure que seul le propriétaire et l'entreprise active peuvent le supprimer.
      */
     public function destroy(Customer $customer)
     {
-        // Vérifie si l'utilisateur connecté est le propriétaire du client.
-        if ($customer->user_id !== Auth::id()) {
+        // Vérifie si l'utilisateur connecté est le propriétaire du client ET si elle appartient à l'entreprise active.
+        if (!Auth::check() || $customer->user_id !== Auth::id() || $customer->company_id !== Session::get('active_company_id')) {
             abort(403, 'Accès non autorisé à supprimer ce client.');
         }
 

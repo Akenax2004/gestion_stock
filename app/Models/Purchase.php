@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
+
 class Purchase extends Model
 {
     use HasFactory;
@@ -24,6 +25,7 @@ class Purchase extends Model
         'total_amount',
         'created_by',
         'updated_by',
+        'company_id', // AJOUTEZ CETTE LIGNE
     ];
 
     protected $casts = [
@@ -58,5 +60,9 @@ class Purchase extends Model
         $query->where('purchase_no', 'like', "%{$value}%")
             ->orWhere('status', 'like', "%{$value}%")
         ;
+    }
+    public function companies(): HasMany
+    {
+        return $this->hasMany(Company::class);
     }
 }
