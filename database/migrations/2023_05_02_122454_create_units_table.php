@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('slug')->unique();
             $table->string('short_code')->nullable();
             $table->foreignId('user_id')
+                    ->nullable()
                    ->constrained('users')
                    ->nullOnDelete();
             $table->timestamps();

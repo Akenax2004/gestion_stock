@@ -20,6 +20,7 @@ return new class extends Migration
             
             // La clé étrangère 'user_id' est retirée.
             $table->foreignId('user_id')
+                   ->nullable()
                    ->constrained('users')
                    ->nullOnDelete();
 

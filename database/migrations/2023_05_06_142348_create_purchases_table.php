@@ -28,7 +28,7 @@ return new class extends Migration
             $table->foreignIdFor(\App\Models\User::class, 'created_by');
             $table->foreignIdFor(\App\Models\User::class, 'updated_by')
                 ->nullable();
-            $table->foreignId('user_id')->constrained('users')->nullOnDelete(); // Assure que les commandes sont liées à l'utilisateur qui les a créées/gérées
+            $table->foreignId('user_id')->nullable()->constrained('users')->nullOnDelete(); // Assure que les commandes sont liées à l'utilisateur qui les a créées/gérées
             $table->timestamps();
         });
     }

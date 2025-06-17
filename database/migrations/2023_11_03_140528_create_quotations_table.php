@@ -34,6 +34,7 @@ return new class extends Migration
 
             // AJOUT DE LA LIGNE SUIVANTE pour lier le devis à l'utilisateur
             $table->foreignId('user_id')
+                ->nullable()
                 ->constrained('users') // Assurez-vous que c'est bien la table 'users' de Laravel
                 ->nullOnDelete(); // ou nullOnDelete() si un devis peut exister sans utilisateur créateur
 
