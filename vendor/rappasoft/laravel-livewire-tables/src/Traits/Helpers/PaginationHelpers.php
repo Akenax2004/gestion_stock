@@ -27,6 +27,13 @@ trait PaginationHelpers
         return $this->paginationTheme;
     }
 
+    #[Computed]
+    public function showPaginationDropdown(): bool
+    {
+        return $this->paginationIsEnabled() && $this->perPageVisibilityIsEnabled();
+    }
+
+    #[Computed]
     public function paginationIsEnabled(): bool
     {
         return $this->getPaginationStatus() === true;
@@ -69,7 +76,12 @@ trait PaginationHelpers
 
     public function getPerPage(): int
     {
-        return $this->perPage;
+        return $this->perPage ?? $this->getDefaultPerPage();
+    }
+
+    public function getDefaultPerPage(): int
+    {
+        return in_array((int) $this->defaultPerPage, $this->getPerPageAccepted()) ? $this->defaultPerPage : ($this->getPerPageAccepted()[0] ?? 10);
     }
 
     /**
@@ -113,6 +125,7 @@ trait PaginationHelpers
         return $this->paginationCurrentCount;
     }
 
+    #[Computed]
     public function showPaginationDetails(): bool
     {
         return $this->shouldShowPaginationDetails === true;
@@ -128,7 +141,7 @@ trait PaginationHelpers
         if (in_array(session($this->getPerPagePaginationSessionKey(), $this->getPerPage()), $this->getPerPageAccepted(), true)) {
             $this->setPerPage(session($this->getPerPagePaginationSessionKey(), $this->getPerPage()));
         } else {
-            $this->setPerPage($this->getPerPageAccepted()[0] ?? 10);
+            $this->setPerPage($this->getDefaultPerPage());
         }
     }
 
@@ -146,25 +159,8 @@ trait PaginationHelpers
     }
 
     #[Computed]
-    public function getPerPageFieldAttributes(): array
-    {
-        return $this->perPageFieldAttributes;
-    }
-
-    #[Computed]
     public function getShouldRetrieveTotalItemCount(): bool
     {
         return $this->shouldRetrieveTotalItemCount;
-    }
-
-    public function getPaginationWrapperAttributes(): array
-    {
-        return $this->paginationWrapperAttributes ?? ['class' => ''];
-    }
-
-    #[Computed]
-    public function getPaginationWrapperAttributesBag(): ComponentAttributeBag
-    {
-        return new ComponentAttributeBag($this->getPaginationWrapperAttributes());
     }
 }

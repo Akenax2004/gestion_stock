@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Providers;
-
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Breadcrumbs\Breadcrumbs;
 use Illuminate\Pagination\Paginator;
@@ -23,6 +23,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+
+        Carbon::setLocale('fr');
+
         // Fix pour les erreurs "clé trop longue" sous MySQL
         Schema::defaultStringLength(191);
 
@@ -32,4 +35,6 @@ class AppServiceProvider extends ServiceProvider
             return new Breadcrumbs($this);
         });
     }
+
+    
 }

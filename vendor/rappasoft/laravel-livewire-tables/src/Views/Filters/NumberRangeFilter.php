@@ -3,8 +3,7 @@
 namespace Rappasoft\LaravelLivewireTables\Views\Filters;
 
 use Rappasoft\LaravelLivewireTables\Views\Filter;
-use Rappasoft\LaravelLivewireTables\Views\Traits\Core\HasWireables;
-use Rappasoft\LaravelLivewireTables\Views\Traits\Filters\{HasOptions};
+use Rappasoft\LaravelLivewireTables\Views\Filters\Traits\{HasOptions, HasWireables};
 
 class NumberRangeFilter extends Filter
 {
@@ -89,7 +88,7 @@ class NumberRangeFilter extends Filter
     public function getFilterPillValue($values): array|string|bool|null
     {
         if ($this->validate($values)) {
-            return __('livewire-tables::min').':'.$values['min'].', '.__('livewire-tables::max').':'.$values['max'];
+            return __($this->getLocalisationPath().'min').':'.$values['min'].', '.__($this->getLocalisationPath().'max').':'.$values['max'];
         }
 
         return '';

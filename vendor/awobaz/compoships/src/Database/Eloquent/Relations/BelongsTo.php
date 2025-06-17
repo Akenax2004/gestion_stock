@@ -9,9 +9,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo as BaseBelongsTo;
 
 /**
  * @template TRelatedModel of \Illuminate\Database\Eloquent\Model
- * @template TChildModel of \Illuminate\Database\Eloquent\Model
+ * @template TDeclaringModel of \Illuminate\Database\Eloquent\Model
  *
- * @extends BaseBelongsTo<TRelatedModel,TChildModel>
+ * @extends BaseBelongsTo<TRelatedModel,TDeclaringModel, TRelatedModel>
  */
 class BelongsTo extends BaseBelongsTo
 {
@@ -54,7 +54,7 @@ class BelongsTo extends BaseBelongsTo
         $relationName = property_exists($this, 'relationName') ? $this->relationName : $this->relation;
         if ($model instanceof Model) {
             $this->child->setRelation($relationName, $model);
-            // proper unset // https://github.com/illuminate/database/commit/44411c7288fc7b7d4e5680cfcdaa46d348b5c981
+        // proper unset // https://github.com/illuminate/database/commit/44411c7288fc7b7d4e5680cfcdaa46d348b5c981
         } elseif ($this->child->isDirty($this->foreignKey)) {
             $this->child->unsetRelation($relationName);
         }
@@ -234,7 +234,7 @@ class BelongsTo extends BaseBelongsTo
         foreach ($results as $result) {
             if (is_array($owner)) { //Check for multi-columns relationship
                 $dictKeyValues = array_map(function ($k) use ($result) {
-                    return $result->{$k};
+                    return $result->{$k} instanceof \BackedEnum ? $result->{$k}->value : $result->{$k};
                 }, $owner);
 
                 $dictionary[implode('-', $dictKeyValues)] = $result;
@@ -249,7 +249,7 @@ class BelongsTo extends BaseBelongsTo
         foreach ($models as $model) {
             if (is_array($foreign)) { //Check for multi-columns relationship
                 $dictKeyValues = array_map(function ($k) use ($model) {
-                    return $model->{$k};
+                    return $model->{$k} instanceof \BackedEnum ? $model->{$k}->value : $model->{$k};
                 }, $foreign);
 
                 $key = implode('-', $dictKeyValues);

@@ -5,10 +5,9 @@ namespace Rappasoft\LaravelLivewireTables\Views\Columns;
 use Illuminate\Database\Eloquent\Model;
 use Rappasoft\LaravelLivewireTables\Exceptions\DataTableConfigurationException;
 use Rappasoft\LaravelLivewireTables\Views\Column;
-use Rappasoft\LaravelLivewireTables\Views\Traits\Configuration\BooleanColumnConfiguration;
-use Rappasoft\LaravelLivewireTables\Views\Traits\Core\HasCallback;
-use Rappasoft\LaravelLivewireTables\Views\Traits\Core\HasConfirmation;
-use Rappasoft\LaravelLivewireTables\Views\Traits\Helpers\BooleanColumnHelpers;
+use Rappasoft\LaravelLivewireTables\Views\Columns\Traits\Configuration\BooleanColumnConfiguration;
+use Rappasoft\LaravelLivewireTables\Views\Columns\Traits\Helpers\BooleanColumnHelpers;
+use Rappasoft\LaravelLivewireTables\Views\Traits\Core\{HasCallback,HasConfirmation};
 
 class BooleanColumn extends Column
 {
@@ -44,6 +43,7 @@ class BooleanColumn extends Column
             ->withIsTailwind($this->isTailwind())
             ->withIsBootstrap($this->isBootstrap())
             ->withSuccessValue($this->getSuccessValue())
+            ->withValue($value)
             ->withType($this->getType())
             ->withStatus($this->hasCallback() ? call_user_func($this->getCallback(), $value, $row) : (bool) $value === true);
     }

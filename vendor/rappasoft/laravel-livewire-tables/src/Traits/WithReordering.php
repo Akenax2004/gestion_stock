@@ -2,14 +2,15 @@
 
 namespace Rappasoft\LaravelLivewireTables\Traits;
 
-use Livewire\Attributes\Locked;
 use Rappasoft\LaravelLivewireTables\Traits\Configuration\ReorderingConfiguration;
 use Rappasoft\LaravelLivewireTables\Traits\Helpers\ReorderingHelpers;
+use Rappasoft\LaravelLivewireTables\Traits\Styling\HasReorderStyling;
 
 trait WithReordering
 {
     use ReorderingConfiguration,
-        ReorderingHelpers;
+        ReorderingHelpers,
+        HasReorderStyling;
 
     // Entangled in JS
     public bool $reorderStatus = false;
@@ -32,8 +33,6 @@ trait WithReordering
 
     protected string $defaultReorderDirection = 'asc';
 
-    protected array $reorderThAttributes = ['default' => true];
-
     public function setupReordering(): void
     {
         if ($this->reorderIsDisabled()) {
@@ -52,13 +51,10 @@ trait WithReordering
 
     public function enableReordering(): void
     {
-        //$this->enablePaginatedReordering();
-
         $this->setReorderingSession();
         $this->setReorderingBackup();
         $this->resetReorderFields();
         $this->reorderStatus = $this->currentlyReorderingStatus = $this->reorderDisplayColumn = true;
-
     }
 
     public function disableReordering(): void

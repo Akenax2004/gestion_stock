@@ -3,7 +3,6 @@
 namespace Rappasoft\LaravelLivewireTables\Traits;
 
 use Illuminate\Support\Collection;
-use Livewire\Attributes\Locked;
 use Rappasoft\LaravelLivewireTables\Exceptions\NoColumnsException;
 use Rappasoft\LaravelLivewireTables\Traits\Configuration\ColumnConfiguration;
 use Rappasoft\LaravelLivewireTables\Traits\Helpers\ColumnHelpers;
@@ -15,15 +14,11 @@ trait WithColumns
 
     protected Collection $columns;
 
-    protected Collection $prependedColumns;
+    protected ?Collection $prependedColumns;
 
-    protected Collection $appendedColumns;
+    protected ?Collection $appendedColumns;
 
-    protected ?bool $shouldAlwaysCollapse;
-
-    protected ?bool $shouldMobileCollapse;
-
-    protected ?bool $shouldTabletCollapse;
+    protected bool $hasRunColumnSetup = false;
 
     /**
      * Sets up Columns
@@ -54,22 +49,6 @@ trait WithColumns
      * The array defining the columns of the table.
      */
     abstract public function columns(): array;
-
-    /**
-     * Prepend columns.
-     */
-    public function prependColumns(): array
-    {
-        return [];
-    }
-
-    /**
-     * Append columns.
-     */
-    public function appendColumns(): array
-    {
-        return [];
-    }
 
     /**
      * Add Columns to View

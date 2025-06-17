@@ -3,50 +3,27 @@
 namespace Rappasoft\LaravelLivewireTables\Traits;
 
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Str;
 use Livewire\Attributes\Locked;
 use Rappasoft\LaravelLivewireTables\Exceptions\DataTableConfigurationException;
 use Rappasoft\LaravelLivewireTables\Traits\Configuration\ComponentConfiguration;
+use Rappasoft\LaravelLivewireTables\Traits\Core\Component\{HandlesComputedProperties,HandlesEmptyMessage, HandlesFingerprint, HandlesOfflineIndicator,HandlesTableName};
 use Rappasoft\LaravelLivewireTables\Traits\Helpers\ComponentHelpers;
 
 trait ComponentUtilities
 {
-    use ComponentConfiguration,
+    use HandlesTableName,
+        HandlesFingerprint,
+        HandlesEmptyMessage,
+        HandlesComputedProperties,
+        HandlesOfflineIndicator,
+        ComponentConfiguration,
         ComponentHelpers;
 
     public array $table = [];
 
-    protected Builder $builder;
-
     protected $model;
 
-    protected ?string $primaryKey;
-
-    protected array $relationships = [];
-
-    #[Locked]
-    public string $tableName = 'table';
-
-    #[Locked]
-    public ?string $dataTableFingerprint;
-
-    protected bool $offlineIndicatorStatus = true;
-
-    protected bool $eagerLoadAllRelationsStatus = false;
-
-    protected string $emptyMessage = 'No items found. Try to broaden your search.';
-
-    protected array $additionalSelects = [];
-
-    protected array $extraWiths = [];
-
-    protected array $extraWithCounts = [];
-
-    protected array $extraWithSums = [];
-
-    protected array $extraWithAvgs = [];
-
-    protected bool $useComputedProperties = true;
+    protected bool $hasRunConfigure = false;
 
     /**
      * Set any configuration options
@@ -71,16 +48,7 @@ trait ComponentUtilities
      */
     public function bootedComponentUtilities(): void
     {
-        // Fire Lifecycle Hooks for configuring
-        $this->callHook('configuring');
-        $this->callTraitHook('configuring');
-
-        // Call the configure() method
-        $this->configure();
-
-        // Fire Lifecycle Hooks for configured
-        $this->callHook('configured');
-        $this->callTraitHook('configured');
+        $this->runCoreConfiguration();
 
         // Make sure a primary key is set
         if (! $this->hasPrimaryKey()) {
@@ -89,15 +57,23 @@ trait ComponentUtilities
 
     }
 
-    /**
-     * Returns a unique id for the table, used as an alias to identify one table from another session and query string to prevent conflicts
-     */
-    protected function generateDataTableFingerprint(): string
+    protected function runCoreConfiguration(): void
     {
-        $className = str_split(static::class);
-        $crc32 = sprintf('%u', crc32(serialize($className)));
+        if (! $this->hasRunConfigure) {
+            // Fire Lifecycle Hooks for configuring
+            $this->callHook('configuring');
+            $this->callTraitHook('configuring');
 
-        return base_convert($crc32, 10, 36);
+            // Call the configure() method
+            $this->configure();
+
+            // Fire Lifecycle Hooks for configured
+            $this->callHook('configured');
+            $this->callTraitHook('configured');
+
+            $this->hasRunConfigure = true;
+
+        }
     }
 
     /**

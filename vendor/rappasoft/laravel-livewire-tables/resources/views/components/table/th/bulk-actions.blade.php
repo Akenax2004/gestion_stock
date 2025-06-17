@@ -1,20 +1,18 @@
-@aware(['component', 'tableName'])
+@aware(['tableName','isTailwind', 'isBootstrap'])
 @php
     $customAttributes = $this->hasBulkActionsThAttributes ? $this->getBulkActionsThAttributes : $this->getAllThAttributes($this->getBulkActionsColumn())['customAttributes'];
-
     $bulkActionsThCheckboxAttributes = $this->getBulkActionsThCheckboxAttributes();
-    $theme = $this->getTheme();
 @endphp
 
 @if ($this->bulkActionsAreEnabled() && $this->hasBulkActions())
-    <x-livewire-tables::table.th.plain wire:key="{{ $tableName }}-thead-bulk-actions" :displayMinimisedOnReorder="true" :$customAttributes>
+    <x-livewire-tables::table.th.plain  :displayMinimisedOnReorder="true" wire:key="{{ $tableName }}-thead-bulk-actions" :$customAttributes>
         <div
             x-data="{newSelectCount: 0, indeterminateCheckbox: false, bulkActionHeaderChecked: false}"
             x-init="$watch('selectedItems', value => indeterminateCheckbox = (value.length > 0 && value.length < paginationTotalItemCount))"
             x-cloak x-show="currentlyReorderingStatus !== true"
             @class([
-                'inline-flex rounded-md shadow-sm' => $theme === 'tailwind',
-                'form-check' => $theme === 'bootstrap-5',
+                'inline-flex rounded-md shadow-sm' => $isTailwind,
+                'form-check' => $isBootstrap,
             ])
         >
             <input
@@ -24,8 +22,9 @@
                 :checked="selectedItems.length == paginationTotalItemCount"
                 {{
                     $attributes->merge($bulkActionsThCheckboxAttributes)->class([
-                        'rounded border-gray-300 text-indigo-600 shadow-sm transition duration-150 ease-in-out focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 dark:bg-gray-900 dark:text-white dark:border-gray-600 dark:hover:bg-gray-600 dark:focus:bg-gray-600' => ($theme === 'tailwind') && ($bulkActionsThCheckboxAttributes['default'] ?? true),
-                        'form-check-input' => ($theme === 'bootstrap-5') && ($bulkActionsThCheckboxAttributes['default'] ?? true),
+                        'border-gray-300 text-indigo-600 focus:border-indigo-300 focus:ring-indigo-200 dark:bg-gray-900 dark:text-white dark:border-gray-600 dark:hover:bg-gray-600 dark:focus:bg-gray-600' => $isTailwind && (($bulkActionsThCheckboxAttributes['default'] ?? true) || ($bulkActionsThCheckboxAttributes['default-colors'] ?? true)),
+                        'rounded shadow-sm transition duration-150 ease-in-out focus:ring focus:ring-opacity-50 ' => $isTailwind && (($bulkActionsThCheckboxAttributes['default'] ?? true) || ($bulkActionsThCheckboxAttributes['default-styling'] ?? true)),
+                        'form-check-input' => $isBootstrap && ($bulkActionsThCheckboxAttributes['default'] ?? true),
                     ])->except(['default','default-styling','default-colors'])
                 }}
             />

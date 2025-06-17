@@ -5,7 +5,6 @@ namespace Rappasoft\LaravelLivewireTables\Commands;
 use Illuminate\Console\Command;
 use Illuminate\Contracts\Console\PromptsForMissingInput;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
 use Livewire\Features\SupportConsoleCommands\Commands\ComponentParser;
@@ -127,7 +126,7 @@ class MakeCommand extends Command implements PromptsForMissingInput
         if (isset($this->modelPath)) {
             $filename = rtrim($this->modelPath, '/').'/'.$this->model.'.php';
             if (File::exists($filename)) {
-                //In case the file has more than one class which is highly unlikely but still possible
+                // In case the file has more than one class which is highly unlikely but still possible
                 $classes = array_filter($this->getClassesList($filename), function ($class) {
                     return substr($class, strrpos($class, '\\') + 1) == $this->model;
                 });

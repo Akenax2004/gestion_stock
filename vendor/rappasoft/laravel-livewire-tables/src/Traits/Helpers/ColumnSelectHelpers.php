@@ -14,6 +14,7 @@ trait ColumnSelectHelpers
         return $this->columnSelectStatus;
     }
 
+    #[Computed]
     public function columnSelectIsEnabled(): bool
     {
         return $this->getColumnSelectStatus() === true;
@@ -60,8 +61,6 @@ trait ColumnSelectHelpers
             ->reject(fn (Column $column) => ! $this->columnSelectIsEnabledForColumn($column))
             ->values();
     }
-
-    public function getCurrentlySelectedCols(): void {}
 
     public function getUnSelectableColumns(): Collection
     {
@@ -117,15 +116,6 @@ trait ColumnSelectHelpers
 
     #[Computed]
     public function selectedVisibleColumns(): array
-    {
-        return $this->getColumns()
-            ->reject(fn (Column $column) => $column->isHidden())
-            ->reject(fn (Column $column) => ($column->isSelectable() && ! $this->columnSelectIsEnabledForColumn($column)))
-            ->values()
-            ->toArray();
-    }
-
-    public function getVisibleColumns(): array
     {
         return $this->getColumns()
             ->reject(fn (Column $column) => $column->isHidden())
@@ -208,4 +198,15 @@ trait ColumnSelectHelpers
         }
 
     }
+
+    /** To Be Removed */
+    /*
+    public function getVisibleColumns(): array
+    {
+        return $this->selectedVisibleColumns();
+    }
+
+    public function getCurrentlySelectedCols(): void {}
+    */
+
 }

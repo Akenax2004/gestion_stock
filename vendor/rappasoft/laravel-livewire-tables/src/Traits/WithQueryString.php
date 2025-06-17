@@ -12,6 +12,14 @@ trait WithQueryString
         QueryStringHelpers;
 
     #[Locked]
+    public array $queryStringConfig = [
+        'columns' => ['status' => false, 'alias' => null],
+        'filters' => ['status' => true, 'alias' => null],
+        'search' => ['status' => true, 'alias' => null],
+        'sorts' => ['status' => true, 'alias' => null],
+    ];
+
+    #[Locked]
     public ?bool $queryStringStatus;
 
     protected ?string $queryStringAlias;

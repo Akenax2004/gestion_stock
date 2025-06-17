@@ -3,8 +3,7 @@
 namespace Rappasoft\LaravelLivewireTables\Views\Filters;
 
 use Rappasoft\LaravelLivewireTables\Views\Filter;
-use Rappasoft\LaravelLivewireTables\Views\Traits\Core\HasWireables;
-use Rappasoft\LaravelLivewireTables\Views\Traits\Filters\{HandlesWildcardStrings, IsStringFilter};
+use Rappasoft\LaravelLivewireTables\Views\Filters\Traits\{HandlesWildcardStrings, HasWireables, IsStringFilter};
 
 class TextFilter extends Filter
 {
@@ -23,5 +22,20 @@ class TextFilter extends Filter
         }
 
         return strlen($value) ? $value : false;
+    }
+
+    protected function getCoreInputAttributes(): array
+    {
+        $attributes = array_merge(parent::getCoreInputAttributes(),
+            [
+                'type' => 'text',
+                'placeholder' => $this->hasConfig('placeholder') ? $this->getConfig('placeholder') : null,
+                'maxlength' => $this->hasConfig('maxlength') ? $this->getConfig('maxlength') : null,
+                'wire:key' => $this->generateWireKey($this->getGenericDisplayData()['tableName'], 'text'),
+
+            ]);
+        ksort($attributes);
+
+        return $attributes;
     }
 }

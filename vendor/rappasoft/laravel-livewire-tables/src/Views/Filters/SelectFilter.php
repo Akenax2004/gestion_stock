@@ -4,8 +4,7 @@ namespace Rappasoft\LaravelLivewireTables\Views\Filters;
 
 use Illuminate\Support\Collection;
 use Rappasoft\LaravelLivewireTables\Views\Filter;
-use Rappasoft\LaravelLivewireTables\Views\Traits\Core\HasWireables;
-use Rappasoft\LaravelLivewireTables\Views\Traits\Filters\{HasOptions,IsStringFilter};
+use Rappasoft\LaravelLivewireTables\Views\Filters\Traits\{HasOptions, HasWireables, IsStringFilter};
 
 class SelectFilter extends Filter
 {
@@ -48,5 +47,16 @@ class SelectFilter extends Filter
             ?? (new Collection($this->getOptions()))
                 ->mapWithKeys(fn ($options, $optgroupLabel) => is_iterable($options) ? $options : [$optgroupLabel => $options])[$value]
             ?? null;
+    }
+
+    protected function getCoreInputAttributes(): array
+    {
+        $attributes = array_merge(parent::getCoreInputAttributes(),
+            [
+                'wire:key' => $this->generateWireKey($this->getGenericDisplayData()['tableName'], 'select'),
+            ]);
+        ksort($attributes);
+
+        return $attributes;
     }
 }

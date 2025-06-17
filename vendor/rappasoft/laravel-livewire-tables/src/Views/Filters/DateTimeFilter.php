@@ -3,8 +3,7 @@
 namespace Rappasoft\LaravelLivewireTables\Views\Filters;
 
 use Rappasoft\LaravelLivewireTables\Views\Filter;
-use Rappasoft\LaravelLivewireTables\Views\Traits\Core\HasWireables;
-use Rappasoft\LaravelLivewireTables\Views\Traits\Filters\{HandlesDates, HasConfig, IsStringFilter};
+use Rappasoft\LaravelLivewireTables\Views\Filters\Traits\{HandlesDates, HasConfig, HasWireables, IsStringFilter};
 
 class DateTimeFilter extends Filter
 {
@@ -41,5 +40,20 @@ class DateTimeFilter extends Filter
         }
 
         return null;
+    }
+
+    protected function getCoreInputAttributes(): array
+    {
+        $attributes = array_merge(parent::getCoreInputAttributes(),
+            [
+                'min' => $this->hasConfig('min') ? $this->getConfig('min') : null,
+                'max' => $this->hasConfig('max') ? $this->getConfig('max') : null,
+                'placeholder' => $this->hasConfig('placeholder') ? $this->getConfig('placeholder') : null,
+                'type' => 'datetime-local',
+                'wire:key' => $this->generateWireKey($this->getGenericDisplayData()['tableName'], 'datetime'),
+            ]);
+        ksort($attributes);
+
+        return $attributes;
     }
 }

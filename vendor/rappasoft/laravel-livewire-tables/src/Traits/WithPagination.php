@@ -6,16 +6,21 @@ use Livewire\Attributes\Locked;
 use Livewire\WithPagination as LivewirePagination;
 use Rappasoft\LaravelLivewireTables\Traits\Configuration\PaginationConfiguration;
 use Rappasoft\LaravelLivewireTables\Traits\Helpers\PaginationHelpers;
+use Rappasoft\LaravelLivewireTables\Traits\Styling\HasPaginationStyling;
 
 trait WithPagination
 {
     use LivewirePagination,
         PaginationConfiguration,
-        PaginationHelpers;
+        PaginationHelpers,
+        HasPaginationStyling;
 
     public ?string $pageName = null;
 
-    public int $perPage = 10;
+    public ?int $perPage;
+
+    #[Locked]
+    public int $defaultPerPage = 10;
 
     #[Locked]
     public array $perPageAccepted = [10, 25, 50];
@@ -48,18 +53,13 @@ trait WithPagination
 
     protected bool $shouldShowPaginationDetails = true;
 
-    protected array $perPageFieldAttributes = ['default-styling' => true, 'default-colors' => true, 'class' => ''];
-
     protected bool $shouldRetrieveTotalItemCount = true;
-
-    // Used In Frontend
-    protected array $paginationWrapperAttributes = ['class' => ''];
 
     public function mountWithPagination(): void
     {
-        $sessionPerPage = session()->get($this->getPerPagePaginationSessionKey(), $this->getPerPageAccepted()[0] ?? 10);
+        $sessionPerPage = session()->get($this->getPerPagePaginationSessionKey(), $this->getPerPage());
         if (! in_array((int) $sessionPerPage, $this->getPerPageAccepted(), false)) {
-            $sessionPerPage = $this->getPerPageAccepted()[0] ?? 10;
+            $sessionPerPage = $this->getDefaultPerPage();
         }
         $this->setPerPage($sessionPerPage);
     }
@@ -68,7 +68,7 @@ trait WithPagination
     public function updatedPerPage(int|string $value): void
     {
         if (! in_array((int) $value, $this->getPerPageAccepted(), false)) {
-            $value = $this->getPerPageAccepted()[0] ?? 10;
+            $value = $this->getDefaultPerPage();
         }
 
         if (in_array(session($this->getPerPagePaginationSessionKey(), (int) $value), $this->getPerPageAccepted(), true)) {

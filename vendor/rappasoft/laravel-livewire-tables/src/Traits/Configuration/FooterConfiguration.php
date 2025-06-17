@@ -2,6 +2,8 @@
 
 namespace Rappasoft\LaravelLivewireTables\Traits\Configuration;
 
+use Closure;
+
 trait FooterConfiguration
 {
     public function setFooterStatus(bool $status): self
@@ -42,20 +44,6 @@ trait FooterConfiguration
     public function setUseHeaderAsFooterDisabled(): self
     {
         $this->setUseHeaderAsFooterStatus(false);
-
-        return $this;
-    }
-
-    public function setFooterTrAttributes(\Closure $callback): self
-    {
-        $this->footerTrAttributesCallback = $callback;
-
-        return $this;
-    }
-
-    public function setFooterTdAttributes(\Closure $callback): self
-    {
-        $this->footerTdAttributesCallback = $callback;
 
         return $this;
     }

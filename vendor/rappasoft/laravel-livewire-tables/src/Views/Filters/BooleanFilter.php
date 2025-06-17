@@ -3,7 +3,7 @@
 namespace Rappasoft\LaravelLivewireTables\Views\Filters;
 
 use Rappasoft\LaravelLivewireTables\Views\Filter;
-use Rappasoft\LaravelLivewireTables\Views\Traits\Core\HasWireables;
+use Rappasoft\LaravelLivewireTables\Views\Filters\Traits\HasWireables;
 
 class BooleanFilter extends Filter
 {
@@ -53,6 +53,22 @@ class BooleanFilter extends Filter
         }
 
         return true;
+    }
+
+    protected function getCoreInputAttributes(): array
+    {
+        $attributes = array_merge(parent::getCoreInputAttributes(),
+            [
+                '@click' => 'toggleStatusWithUpdate',
+                'activeColor' => 'bg-blue-600',
+                'blobColor' => 'bg-white',
+                'inactiveColor' => 'bg-neutral-200',
+                'type' => 'button',
+                'x-ref' => 'switchButton',
+            ]);
+        ksort($attributes);
+
+        return $attributes;
     }
 
     /**

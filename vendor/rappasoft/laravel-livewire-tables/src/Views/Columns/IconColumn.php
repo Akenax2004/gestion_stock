@@ -2,20 +2,19 @@
 
 namespace Rappasoft\LaravelLivewireTables\Views\Columns;
 
+use Closure;
 use Illuminate\Database\Eloquent\Model;
 use Rappasoft\LaravelLivewireTables\Exceptions\DataTableConfigurationException;
 use Rappasoft\LaravelLivewireTables\Views\Column;
-use Rappasoft\LaravelLivewireTables\Views\Traits\Configuration\IconColumnConfiguration;
-use Rappasoft\LaravelLivewireTables\Views\Traits\Helpers\IconColumnHelpers;
-use Rappasoft\LaravelLivewireTables\Views\Traits\IsColumn;
+use Rappasoft\LaravelLivewireTables\Views\Columns\Traits\Configuration\IconColumnConfiguration;
+use Rappasoft\LaravelLivewireTables\Views\Columns\Traits\Helpers\IconColumnHelpers;
 
 class IconColumn extends Column
 {
-    use IsColumn;
     use IconColumnConfiguration,
         IconColumnHelpers;
 
-    public ?\Closure $iconCallback;
+    public ?Closure $iconCallback;
 
     protected string $view = 'livewire-tables::includes.columns.icon';
 
@@ -33,9 +32,7 @@ class IconColumn extends Column
     {
         $attributeBag = $this->getAttributeBag($row);
 
-        return view($this->getView())
-            ->withIsTailwind($this->isTailwind())
-            ->withIsBootstrap($this->isBootstrap())
+        return $this->getColumnViewWithDefaults()
             ->withIcon($this->getIcon($row))
             ->withClasses($attributeBag['class'])
             ->withAttributes(collect($attributeBag)->except('class')->toArray());
