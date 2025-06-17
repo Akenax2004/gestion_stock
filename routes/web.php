@@ -108,3 +108,8 @@ Route::get('test/', function (){
 //    return view('test');
     return view('orders.create');
 });
+
+Route::get('propos', function () {
+    return view('propos');
+})->name('propos');
+
