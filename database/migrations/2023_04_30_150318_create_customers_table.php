@@ -22,7 +22,7 @@ return new class extends Migration
             $table->string('account_number')->nullable();
             $table->string('bank_name')->nullable();
             // AJOUT DE LA LIGNE SUIVANTE
-            $table->foreignId('user_id')->constrained('users')->nullOnDelete(); // ou nullOnDelete() si les clients peuvent exister sans utilisateur
+            $table->foreignId('user_id')->nullable()->constrained('users')->nullOnDelete(); // ou nullOnDelete() si les clients peuvent exister sans utilisateur
             $table->timestamps();
         });
     }

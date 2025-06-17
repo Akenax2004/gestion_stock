@@ -21,6 +21,7 @@ return new class extends Migration
             // seront également supprimés. Vous pouvez changer ceci en 'nullOnDelete()' si vous préférez
             // que le 'user_id' devienne NULL si l'utilisateur est supprimé, plutôt que de supprimer les produits.
             $table->foreignId('user_id')
+                  ->nullable()
                   ->constrained('users')
                   ->nullOnDelete();
         });
