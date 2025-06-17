@@ -26,6 +26,8 @@ return new class extends Migration
             $table->string('payment_type');
             $table->integer('pay');
             $table->integer('due');
+            // AJOUT DE LA LIGNE SUIVANTE
+            $table->foreignId('user_id')->constrained('users')->nullOnDelete(); // Assure que les commandes sont liées à l'utilisateur qui les a créées/gérées
             $table->timestamps();
         });
     }

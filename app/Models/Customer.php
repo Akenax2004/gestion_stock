@@ -23,6 +23,7 @@ class Customer extends Model
         'account_holder',
         'account_number',
         'bank_name',
+        'user_id',
     ];
 
     protected $casts = [

@@ -25,6 +25,7 @@ class ProductSeeder extends Seeder
                 'notes' => null,
                 'category_id' => 3,
                 'unit_id' => 3,
+                'user_id' => 2,
             ],
             [
                 'name' => 'ASUS Laptop',
@@ -39,6 +40,7 @@ class ProductSeeder extends Seeder
                 'notes' => null,
                 'category_id' => 1,
                 'unit_id' => 3,
+                'user_id' => 1,
             ],
             [
                 'name' => 'Logitech Keyboard',
@@ -53,6 +55,7 @@ class ProductSeeder extends Seeder
                 'notes' => null,
                 'category_id' => 2,
                 'unit_id' => 3,
+                'user_id' => 3,
             ],
             [
                 'name' => 'Logitech Speakers',
@@ -67,6 +70,7 @@ class ProductSeeder extends Seeder
                 'notes' => null,
                 'category_id' => 4,
                 'unit_id' => 3,
+                'user_id' => 4,
             ],
             [
                 'name' => 'AutoCAD v7.0',
@@ -81,6 +85,7 @@ class ProductSeeder extends Seeder
                 'notes' => null,
                 'category_id' => 5,
                 'unit_id' => 3,
+                'user_id' => 6,
             ]
         ]);
 

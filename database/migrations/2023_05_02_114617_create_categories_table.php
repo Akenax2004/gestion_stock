@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
     /**
-     * Run the migrations.
+     * Exécute les migrations.
      */
     public function up(): void
     {
@@ -15,13 +15,20 @@ return new class extends Migration
             $table->id();
             $table->string('name')->unique();
             $table->string('slug')->unique();
-            //$table->string('code')->unique();
-            $table->timestamps();
+            // La colonne 'code' est commentée, donc non créée.
+            //$table->string('code')->unique(); 
+            
+            // La clé étrangère 'user_id' est retirée.
+            $table->foreignId('user_id')
+                   ->constrained('users')
+                   ->nullOnDelete();
+
+            $table->timestamps(); // Ceci crée automatiquement les colonnes `created_at` et `updated_at`.
         });
     }
 
     /**
-     * Reverse the migrations.
+     * Annule les migrations.
      */
     public function down(): void
     {

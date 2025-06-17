@@ -32,6 +32,11 @@ return new class extends Migration
             $table->tinyInteger('status');
             $table->text('note')->nullable();
 
+            // AJOUT DE LA LIGNE SUIVANTE pour lier le devis à l'utilisateur
+            $table->foreignId('user_id')
+                ->constrained('users') // Assurez-vous que c'est bien la table 'users' de Laravel
+                ->nullOnDelete(); // ou nullOnDelete() si un devis peut exister sans utilisateur créateur
+
             $table->timestamps();
         });
     }

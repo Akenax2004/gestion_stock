@@ -24,7 +24,8 @@ class Quotation extends Model
         'status',
         'note',
         'created_at',
-        'updated_at'
+        'updated_at',
+        'user_id',
     ];
 
     protected $casts = [

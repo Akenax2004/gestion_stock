@@ -28,6 +28,7 @@ class Order extends Model
         'payment_type',
         'pay',
         'due',
+        'user_id',
     ];
 
     protected $casts = [
@@ -52,5 +53,10 @@ class Order extends Model
         $query->where('invoice_no', 'like', "%{$value}%")
             ->orWhere('order_status', 'like', "%{$value}%")
             ->orWhere('payment_type', 'like', "%{$value}%");
+    }
+
+        public function user()
+    {
+        return $this->belongsTo(User::class); // Laravel inférera 'user_id'
     }
 }

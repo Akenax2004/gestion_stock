@@ -17,7 +17,8 @@ class Unit extends Model
     protected $fillable = [
         'name',
         'slug',
-        'short_code'
+        'short_code',
+        'user_id',
     ];
 
     protected $casts = [

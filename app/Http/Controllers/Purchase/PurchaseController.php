@@ -14,32 +14,69 @@ use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth; // Importez la façade Auth
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xls;
 
 class PurchaseController extends Controller
 {
+    /**
+     * Affiche une liste de tous les achats de l'utilisateur connecté.
+     */
     public function index()
     {
+        // Vérifie si un utilisateur est authentifié
+        if (!Auth::check()) {
+            return redirect('/login')->withErrors('Veuillez vous connecter.');
+        }
+
+        $userId = Auth::id();
+
+        // Récupère uniquement les achats créés par l'utilisateur connecté
+        $purchases = Purchase::where('created_by', $userId)->latest()->get();
+
         return view('purchases.index', [
-            'purchases' => Purchase::latest()->get(),
+            'purchases' => $purchases,
         ]);
     }
 
+    /**
+     * Affiche une liste des achats approuvés par l'utilisateur connecté.
+     */
     public function approvedPurchases()
     {
+        if (!Auth::check()) {
+            return redirect('/login')->withErrors('Veuillez vous connecter.');
+        }
+
+        $userId = Auth::id();
+
+        // Récupère les achats approuvés par l'utilisateur connecté
         $purchases = Purchase::with(['supplier'])
-            ->where('status', PurchaseStatus::APPROVED)->get(); // 1 = approved
+            ->where('created_by', $userId) // Filtre par l'utilisateur créateur
+            ->where('status', PurchaseStatus::APPROVED)
+            ->get();
 
         return view('purchases.approved-purchases', [
             'purchases' => $purchases,
         ]);
     }
 
+    /**
+     * Affiche les détails d'un achat spécifique.
+     * S'assure que seul le propriétaire peut le voir.
+     */
     public function show(Purchase $purchase)
     {
-        $purchase->loadMissing(['supplier', 'details', 'createdBy', 'updatedBy'])->get();
+        // Vérifie si l'utilisateur connecté est le créateur de l'achat.
+        if (!Auth::check() || $purchase->created_by !== Auth::id()) {
+            abort(403, 'Accès non autorisé à cet achat.');
+        }
 
+        // Charge les relations nécessaires
+        $purchase->loadMissing(['supplier', 'details', 'createdBy', 'updatedBy']);
+
+        // Récupère les détails des produits pour cet achat (implicitement liés à l'utilisateur via l'achat parent)
         $products = PurchaseDetails::where('purchase_id', $purchase->id)->get();
 
         return view('purchases.details-purchase', [
@@ -48,87 +85,179 @@ class PurchaseController extends Controller
         ]);
     }
 
+    /**
+     * Affiche le formulaire de modification d'un achat.
+     * S'assure que seul le propriétaire peut le modifier.
+     */
     public function edit(Purchase $purchase)
     {
-        // N+1 Problem if load 'createdBy', 'updatedBy',
-        $purchase->with(['supplier', 'details'])->get();
+        // Vérifie si l'utilisateur connecté est le créateur de l'achat.
+        if (!Auth::check() || $purchase->created_by !== Auth::id()) {
+            abort(403, 'Accès non autorisé à modifier cet achat.');
+        }
+
+        // Charge les relations nécessaires
+        $purchase->loadMissing(['supplier', 'details']); // Correction: Utilisation de loadMissing au lieu de with()->get()
 
         return view('purchases.edit', [
             'purchase' => $purchase,
         ]);
     }
 
+    /**
+     * Affiche le formulaire de création d'un nouvel achat.
+     * Les catégories et fournisseurs listés sont également filtrés par l'utilisateur.
+     */
     public function create()
     {
+        if (!Auth::check()) {
+            return redirect('/login')->withErrors('Veuillez vous connecter.');
+        }
+
+        $userId = Auth::id();
+
         return view('purchases.create', [
-            'categories' => Category::select(['id', 'name'])->get(),
-            'suppliers' => Supplier::select(['id', 'name'])->get(),
+            // Filtre les catégories et fournisseurs pour n'afficher que ceux de l'utilisateur connecté
+            'categories' => Category::where('user_id', $userId)->select(['id', 'name'])->get(),
+            'suppliers' => Supplier::where('user_id', $userId)->select(['id', 'name'])->get(),
         ]);
     }
 
+    /**
+     * Stocke un nouvel achat dans la base de données, l'associant à l'utilisateur connecté.
+     */
     public function store(StorePurchaseRequest $request)
     {
-        $purchase = Purchase::create($request->all());
+        if (!Auth::check()) {
+            return redirect('/login')->withErrors('Veuillez vous connecter.');
+        }
 
-        /*
-         * TODO: Must validate that
-         */
-        if (! $request->invoiceProducts == null) {
-            $pDetails = [];
+        $userId = Auth::id();
 
-            foreach ($request->invoiceProducts as $product) {
-                $pDetails['purchase_id'] = $purchase['id'];
-                $pDetails['product_id'] = $product['product_id'];
-                $pDetails['quantity'] = $product['quantity'];
-                $pDetails['unitcost'] = $product['unitcost'];
-                $pDetails['total'] = $product['total'];
-                $pDetails['created_at'] = Carbon::now();
+        // Vérification de sécurité : Assurer que le fournisseur soumis appartient bien à l'utilisateur
+        $supplier = Supplier::where('id', $request->supplier_id)->where('user_id', $userId)->first();
+        if (!$supplier) {
+            return back()->withErrors(['supplier_id' => 'Le fournisseur sélectionné n\'existe pas ou ne vous appartient pas.']);
+        }
 
-                //PurchaseDetails::insert($pDetails);
-                $purchase->details()->insert($pDetails);
+        try {
+            // Crée l'achat en ajoutant l'ID de l'utilisateur créateur
+            $purchase = Purchase::create(array_merge($request->validated(), [
+                'created_by' => $userId, // Associe l'achat à l'utilisateur connecté
+                'supplier_id' => $supplier->id, // Utilise l'ID du fournisseur vérifié
+            ]));
+
+            if (!empty($request->invoiceProducts)) { // Utilisation de !empty au lieu de ! $request->invoiceProducts == null
+                $pDetails = [];
+
+                foreach ($request->invoiceProducts as $productData) {
+                    // Vérification de sécurité : Assurer que le produit dans la liste appartient bien à l'utilisateur
+                    $product = Product::where('id', $productData['product_id'])
+                                      ->where('user_id', $userId)
+                                      ->first();
+                    if (!$product) {
+                        DB::rollBack(); // Annule la création de l'achat si un produit n'est pas valide
+                        return back()->withErrors('Un produit dans la liste n\'existe pas ou ne vous appartient pas.');
+                    }
+
+                    $pDetails[] = [ // Ajouter à un tableau pour insertion multiple
+                        'purchase_id' => $purchase->id, // Utilisez $purchase->id
+                        'product_id' => $product->id,    // Utilisez $product->id pour le produit vérifié
+                        'quantity' => $productData['quantity'],
+                        'unitcost' => $productData['unitcost'],
+                        'total' => $productData['total'],
+                        'created_at' => Carbon::now(),
+                        'updated_at' => Carbon::now(), // Ajoutez updated_at pour les timestamps
+                    ];
+                }
+                $purchase->details()->insert($pDetails); // Insertion en une seule fois
+            }
+
+            return redirect()
+                ->route('purchases.index')
+                ->with('success', 'L\'achat a été créé avec succès!');
+
+        } catch (Exception $e) {
+            // Gérer les erreurs inattendues, il est recommandé de les logger
+            \Log::error("Erreur lors de la création de l'achat : " . $e->getMessage());
+            return back()->withErrors(['error' => 'Une erreur est survenue lors de la création de l\'achat.']);
+        }
+    }
+
+    /**
+     * Met à jour un achat (généralement pour l'approuver).
+     * S'assure que seul le propriétaire peut le modifier.
+     */
+    public function update(Purchase $purchase, Request $request)
+    {
+        // Vérifie si l'utilisateur connecté est le créateur de l'achat.
+        if (!Auth::check() || $purchase->created_by !== Auth::id()) {
+            abort(403, 'Accès non autorisé à approuver cet achat.');
+        }
+
+        // Récupère les détails de l'achat
+        $productsInPurchase = PurchaseDetails::where('purchase_id', $purchase->id)->get();
+
+        foreach ($productsInPurchase as $productDetail) {
+            // Vérifier que le produit appartient à l'utilisateur avant de modifier la quantité
+            $product = Product::where('id', $productDetail->product_id)
+                              ->where('user_id', Auth::id())
+                              ->first();
+
+            if ($product) {
+                // Augmente la quantité du produit en stock
+                $product->update(['quantity' => DB::raw('quantity+' . $productDetail->quantity)]);
+            } else {
+                // Gérer le cas où un produit lié à l'achat n'appartient pas à l'utilisateur (erreur ou données incohérentes)
+                \Log::warning("Produit non trouvé ou non propriétaire pour la mise à jour de stock dans l'achat ID: {$purchase->id}, produit ID: {$productDetail->product_id}");
+                return redirect()->back()->withErrors('Un produit lié à cet achat n\'existe pas ou ne vous appartient pas, impossible de mettre à jour le stock.');
             }
         }
 
-        return redirect()
-            ->route('purchases.index')
-            ->with('success', 'Purchase has been created!');
-    }
-
-    public function update(Purchase $purchase, Request $request)
-    {
-        $products = PurchaseDetails::where('purchase_id', $purchase->id)->get();
-
-        foreach ($products as $product) {
-            Product::where('id', $product->product_id)
-                ->update(['quantity' => DB::raw('quantity+'.$product->quantity)]);
-        }
-
-        Purchase::findOrFail($purchase->id)
-            ->update([
-                //'purchase_status' => 1, // 1 = approved, 0 = pending
-                'status' => PurchaseStatus::APPROVED,
-                'updated_by' => auth()->user()->id,
-            ]);
+        // Met à jour le statut de l'achat et l'utilisateur qui l'a mis à jour
+        $purchase->update([
+            'status' => PurchaseStatus::APPROVED, // 1 = approved
+            'updated_by' => Auth::id(), // Utilise Auth::id()
+        ]);
 
         return redirect()
             ->route('purchases.index')
-            ->with('success', 'Purchase has been approved!');
+            ->with('success', 'L\'achat a été approuvé avec succès!');
     }
 
+    /**
+     * Supprime un achat.
+     * S'assure que seul le propriétaire peut le supprimer.
+     */
     public function destroy(Purchase $purchase)
     {
+        // Vérifie si l'utilisateur connecté est le créateur de l'achat.
+        if (!Auth::check() || $purchase->created_by !== Auth::id()) {
+            abort(403, 'Accès non autorisé à supprimer cet achat.');
+        }
+
         $purchase->delete();
 
         return redirect()
-            ->route('purchases.index')
-            ->with('success', 'Purchase has been deleted!');
+            ->back() // Correction: revenir à la page précédente au lieu de route('purchases.index')
+            ->with('success', 'L\'achat a été supprimé avec succès!');
     }
 
+    /**
+     * Affiche le rapport quotidien des achats de l'utilisateur connecté.
+     */
     public function dailyPurchaseReport()
     {
+        if (!Auth::check()) {
+            return redirect('/login')->withErrors('Veuillez vous connecter.');
+        }
+
+        $userId = Auth::id();
+
         $purchases = Purchase::with(['supplier'])
-            //->where('purchase_status', 1)
-            ->where('date', today()->format('Y-m-d'))->get();
+            ->where('created_by', $userId) // Filtre par l'utilisateur créateur
+            ->where('date', today()->format('Y-m-d')) // 'date' est le nom de la colonne
+            ->get();
 
         return view('purchases.daily-report', [
             'purchases' => $purchases,
@@ -140,8 +269,17 @@ class PurchaseController extends Controller
         return view('purchases.report-purchase');
     }
 
+    /**
+     * Exporte le rapport d'achats filtré par l'utilisateur connecté.
+     */
     public function exportPurchaseReport(Request $request)
     {
+        if (!Auth::check()) {
+            return redirect('/login')->withErrors('Veuillez vous connecter.');
+        }
+
+        $userId = Auth::id();
+
         $rules = [
             'start_date' => 'required|string|date_format:Y-m-d',
             'end_date' => 'required|string|date_format:Y-m-d',
@@ -156,17 +294,31 @@ class PurchaseController extends Controller
             ->join('products', 'purchase_details.product_id', '=', 'products.id')
             ->join('purchases', 'purchase_details.purchase_id', '=', 'purchases.id')
             ->join('users', 'users.id', '=', 'purchases.created_by')
-            ->whereBetween('purchases.purchase_date', [$sDate, $eDate])
-            ->where('purchases.purchase_status', '1')
-            ->select('purchases.purchase_no', 'purchases.purchase_date', 'purchases.supplier_id', 'products.code', 'products.name', 'purchase_details.quantity', 'purchase_details.unitcost', 'purchase_details.total', 'users.name as created_by')
+            // AJOUT DU FILTRE PAR L'UTILISATEUR CRÉATEUR
+            ->where('purchases.created_by', $userId)
+            ->whereBetween('purchases.date', [$sDate, $eDate]) // 'date' est le nom de la colonne
+            ->where('purchases.status', PurchaseStatus::APPROVED) // 'status' est le nom de la colonne (valeur 1 pour approuvé)
+            ->select(
+                'purchases.purchase_no',
+                'purchases.date', // Utilisez 'date' au lieu de 'purchase_date'
+                'suppliers.name as supplier_name', // Joignez la table suppliers pour le nom
+                'products.code',
+                'products.name',
+                'purchase_details.quantity',
+                'purchase_details.unitcost',
+                'purchase_details.total',
+                'users.name as created_by'
+            )
+            ->join('suppliers', 'purchases.supplier_id', '=', 'suppliers.id') // Joignez la table des fournisseurs
             ->get();
 
-        dd($purchases);
+        // Correction: Supprime le dd($purchases) car il arrête l'exécution
+        // dd($purchases);
 
         $purchase_array[] = [
             'Date',
             'No Purchase',
-            'Supplier',
+            'Supplier', // Changé de 'Supplier' à 'Supplier Name' pour correspondre au select
             'Product Code',
             'Product',
             'Quantity',
@@ -177,14 +329,15 @@ class PurchaseController extends Controller
 
         foreach ($purchases as $purchase) {
             $purchase_array[] = [
-                'Date' => $purchase->purchase_date,
+                'Date' => $purchase->date, // Utilisez 'date'
                 'No Purchase' => $purchase->purchase_no,
-                'Supplier' => $purchase->supplier_id,
-                'Product Code' => $purchase->product_code,
-                'Product' => $purchase->product_name,
+                'Supplier' => $purchase->supplier_name, // Utilisez le nom du fournisseur joint
+                'Product Code' => $purchase->code, // Utilisez products.code
+                'Product' => $purchase->name,     // Utilisez products.name
                 'Quantity' => $purchase->quantity,
                 'Unitcost' => $purchase->unitcost,
                 'Total' => $purchase->total,
+                'Created By' => $purchase->created_by
             ];
         }
 
@@ -208,7 +361,9 @@ class PurchaseController extends Controller
             $Excel_writer->save('php://output');
             exit();
         } catch (Exception $e) {
-            return $e;
+            // Il est préférable de logguer l'exception et de retourner une réponse conviviale
+            \Log::error("Erreur lors de l'exportation du rapport d'achat : " . $e->getMessage());
+            return back()->withErrors(['error' => 'Une erreur est survenue lors de l\'exportation du rapport.']);
         }
     }
 }
