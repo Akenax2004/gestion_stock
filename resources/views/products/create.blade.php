@@ -38,19 +38,19 @@
                                 />
 
                                 <div class="small font-italic text-muted mb-2">
-                                    JPG or PNG no larger than 2 MB
+                                    JPG ou PNG, max 2 Mo
                                 </div>
 
                                 <input
                                     type="file"
                                     accept="image/*"
                                     id="image"
-                                    name="product_image"
-                                    class="form-control @error('product_image') is-invalid @enderror"
+                                    name="image" {{-- Changed from product_image to image, matching controller validation --}}
+                                    class="form-control @error('image') is-invalid @enderror"
                                     onchange="previewImage();"
                                 >
 
-                                @error('product_image')
+                                @error('image') {{-- Changed from product_image to image --}}
                                 <div class="invalid-feedback">
                                     {{ $message }}
                                 </div>
@@ -77,38 +77,40 @@
                             <div class="card-body">
                                 <div class="row row-cards">
                                     <div class="col-md-12">
-
                                         <x-input name="name"
                                                  id="name"
-                                                 placeholder="Product name"
+                                                 label="Nom du Produit" {{-- Added label for clarity --}}
+                                                 placeholder="Nom du produit"
                                                  value="{{ old('name') }}"
+                                                 required="true" {{-- Added required as it's often required --}}
                                         />
                                     </div>
 
                                     <div class="col-sm-6 col-md-6">
                                         <div class="mb-3">
                                             <label for="category_id" class="form-label">
-                                                Product Category
+                                                Catégorie du Produit
                                                 <span class="text-danger">*</span>
                                             </label>
 
-                                            @if ($categories->count() === 1)
+                                            @if ($categories->count() === 1 && $categories->first())
+                                                {{-- Si une seule catégorie disponible, la sélectionner par défaut et la rendre lecture seule --}}
                                                 <select name="category_id" id="category_id"
                                                         class="form-select @error('category_id') is-invalid @enderror"
                                                         readonly
                                                 >
-                                                    @foreach ($categories as $category)
-                                                        <option value="{{ $category->id }}" selected>
-                                                            {{ $category->name }}
-                                                        </option>
-                                                    @endforeach
+                                                    <option value="{{ $categories->first()->id }}" selected>
+                                                        {{ $categories->first()->name }}
+                                                    </option>
                                                 </select>
+                                                <input type="hidden" name="category_id" value="{{ $categories->first()->id }}"> {{-- Champ caché pour s'assurer que la valeur est soumise --}}
                                             @else
                                                 <select name="category_id" id="category_id"
                                                         class="form-select @error('category_id') is-invalid @enderror"
+                                                        required {{-- Added required attribute --}}
                                                 >
-                                                    <option selected="" disabled="">
-                                                        Select a category:
+                                                    <option value="" selected="" disabled="">
+                                                        Sélectionner une catégorie:
                                                     </option>
 
                                                     @foreach ($categories as $category)
@@ -130,31 +132,32 @@
                                     <div class="col-sm-6 col-md-6">
                                         <div class="mb-3">
                                             <label class="form-label" for="unit_id">
-                                                {{ __('Unit') }}
+                                                Unité
                                                 <span class="text-danger">*</span>
                                             </label>
 
-                                            @if ($units->count() === 1)
-                                                <select name="category_id" id="category_id"
-                                                        class="form-select @error('category_id') is-invalid @enderror"
+                                            @if ($units->count() === 1 && $units->first())
+                                                {{-- Si une seule unité disponible, la sélectionner par défaut et la rendre lecture seule --}}
+                                                <select name="unit_id" id="unit_id" {{-- CORRECTED NAME HERE: unit_id --}}
+                                                        class="form-select @error('unit_id') is-invalid @enderror"
                                                         readonly
                                                 >
-                                                    @foreach ($units as $unit)
-                                                        <option value="{{ $unit->id }}" selected>
-                                                            {{ $unit->name }}
-                                                        </option>
-                                                    @endforeach
+                                                    <option value="{{ $units->first()->id }}" selected>
+                                                        {{ $units->first()->name }}
+                                                    </option>
                                                 </select>
+                                                <input type="hidden" name="unit_id" value="{{ $units->first()->id }}"> {{-- Champ caché pour s'assurer que la valeur est soumise --}}
                                             @else
-                                                <select name="unit_id" id="unit_id"
+                                                <select name="unit_id" id="unit_id" {{-- CORRECTED NAME HERE: unit_id --}}
                                                         class="form-select @error('unit_id') is-invalid @enderror"
+                                                        required {{-- Added required attribute --}}
                                                 >
-                                                    <option selected="" disabled="">
-                                                        Select a unit:
+                                                    <option value="" selected="" disabled="">
+                                                        Sélectionner une unité:
                                                     </option>
 
                                                     @foreach ($units as $unit)
-                                                        <option value="{{ $unit->id }}" @if(old('unit_id') == $unit->id) selected="selected" @endif>{{ $unit->name }}</option>
+                                                        <option value="{{ $unit->id }}" @if(old('unit_id') == $unit->id) selected="selected" @endif>{{ $unit->name }} ({{ $unit->short_code }})</option>
                                                     @endforeach
                                                 </select>
                                             @endif
@@ -169,47 +172,51 @@
 
                                     <div class="col-sm-6 col-md-6">
                                         <x-input type="number"
-                                                 label="Buying Price"
+                                                 label="Prix d'Achat"
                                                  name="buying_price"
                                                  id="buying_price"
                                                  placeholder="0"
                                                  value="{{ old('buying_price') }}"
+                                                 required="true"
                                         />
                                     </div>
 
                                     <div class="col-sm-6 col-md-6">
                                         <x-input type="number"
-                                                 label="Selling Price"
+                                                 label="Prix de Vente"
                                                  name="selling_price"
                                                  id="selling_price"
                                                  placeholder="0"
                                                  value="{{ old('selling_price') }}"
+                                                 required="true"
                                         />
                                     </div>
 
                                     <div class="col-sm-6 col-md-6">
                                         <x-input type="number"
-                                                 label="Quantity"
+                                                 label="Quantité"
                                                  name="quantity"
                                                  id="quantity"
                                                  placeholder="0"
                                                  value="{{ old('quantity') }}"
+                                                 required="true"
                                         />
                                     </div>
 
                                     <div class="col-sm-6 col-md-6">
                                         <x-input type="number"
-                                                 label="Quantity Alert"
+                                                 label="Alerte Quantité"
                                                  name="quantity_alert"
                                                  id="quantity_alert"
                                                  placeholder="0"
                                                  value="{{ old('quantity_alert') }}"
+                                                 required="true"
                                         />
                                     </div>
 
                                     <div class="col-sm-6 col-md-6">
                                         <x-input type="number"
-                                                 label="Tax"
+                                                 label="Taxe"
                                                  name="tax"
                                                  id="tax"
                                                  placeholder="0"
@@ -220,12 +227,13 @@
                                     <div class="col-sm-6 col-md-6">
                                         <div class="mb-3">
                                             <label class="form-label" for="tax_type">
-                                                {{ __('Tax Type') }}
+                                                Type de Taxe
                                             </label>
 
                                             <select name="tax_type" id="tax_type"
                                                     class="form-select @error('tax_type') is-invalid @enderror"
                                             >
+                                                <option value="">Sélectionner un type de taxe</option>
                                                 @foreach(\App\Enums\TaxType::cases() as $taxType)
                                                 <option value="{{ $taxType->value }}" @selected(old('tax_type') == $taxType->value)>
                                                     {{ $taxType->label() }}
@@ -244,15 +252,15 @@
                                     <div class="col-md-12">
                                         <div class="mb-3">
                                             <label for="notes" class="form-label">
-                                                {{ __('Notes') }}
+                                                Notes
                                             </label>
 
                                             <textarea name="notes"
                                                       id="notes"
                                                       rows="5"
                                                       class="form-control @error('notes') is-invalid @enderror"
-                                                      placeholder="Product notes"
-                                            ></textarea>
+                                                      placeholder="Notes sur le produit"
+                                            >{{ old('notes') }}</textarea>
 
                                             @error('notes')
                                             <div class="invalid-feedback">
@@ -266,11 +274,11 @@
 
                             <div class="card-footer text-end">
                                 <x-button.save type="submit">
-                                    {{ __('Save') }}
+                                    Enregistrer
                                 </x-button.save>
 
                                 <x-button.back route="{{ route('products.index') }}">
-                                    {{ __('Cancel') }}
+                                    Annuler
                                 </x-button.back>
                             </div>
                         </div>

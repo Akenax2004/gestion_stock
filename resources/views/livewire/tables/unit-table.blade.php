@@ -61,6 +61,11 @@
                         @include('inclues._sort-icon', ['field' => 'short_code'])
                     </a>
                 </th>
+                {{-- AJOUTEZ CETTE NOUVELLE COLONNE POUR LES PRODUITS --}}
+                <th scope="col" class="align-middle text-center">
+                    {{ __('Associated Products') }}
+                </th>
+                {{-- FIN DE LA NOUVELLE COLONNE --}}
                 <th scope="col" class="align-middle text-center">
                     {{ __('Action') }}
                 </th>
@@ -81,6 +86,15 @@
                     <td class="align-middle text-center">
                         {{ $unit->short_code }}
                     </td>
+                    {{-- AFFICHAGE DES PRODUITS ASSOCIÉS --}}
+                    <td class="align-middle">
+                        @forelse ($unit->products as $product)
+                            {{ $product->name }} ({{ $product->code }})@unless($loop->last), @endunless
+                        @empty
+                            <span class="text-secondary">Aucun produit</span>
+                        @endforelse
+                    </td>
+                    {{-- FIN DE L'AFFICHAGE DES PRODUITS --}}
                     <td class="align-middle text-center" style="width: 10%">
                         <x-button.show class="btn-icon" route="{{ route('units.show', $unit) }}"/>
                         <x-button.edit class="btn-icon" route="{{ route('units.edit', $unit) }}"/>
@@ -89,7 +103,7 @@
                 </tr>
             @empty
                 <tr>
-                    <td class="align-middle text-center" colspan="8">
+                    <td class="align-middle text-center" colspan="9"> {{-- Notez le colspan augmenté à 9 pour la nouvelle colonne --}}
                         No results found
                     </td>
                 </tr>

@@ -15,7 +15,7 @@
     <label for="{{ $id }}"
            class="form-label @error($name) text-danger @enderror {{ $required ? 'required' : '' }}"
     >
-        {{ __($label) }}
+        {{ ($label) }}
     </label>
 
     <input type="{{ $type }}"

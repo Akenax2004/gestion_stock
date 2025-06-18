@@ -47,4 +47,9 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->hasMany(Company::class);
     }
+    public function licence() // Si vous avez renommé CompanyLicence en UserLicence, utilisez "UserLicence::class"
+    {
+        return $this->hasOne(CompanyLicence::class); // Ou UserLicence::class
+    }
+
 }

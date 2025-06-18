@@ -3,337 +3,219 @@
 namespace App\Http\Controllers\Product;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Product\StoreProductRequest;
-use App\Http\Requests\Product\UpdateProductRequest;
-use App\Models\Category;
 use App\Models\Product;
+use App\Models\Category;
 use App\Models\Unit;
 use Illuminate\Http\Request;
-use Picqer\Barcode\BarcodeGeneratorHTML;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Session; // NOUVEAU : Importez la façade Session
+use Illuminate\Support\Facades\Session;
+use Illuminate\Validation\Rule;
+use Illuminate\Support\Str;
 
 class ProductController extends Controller
 {
-    /**
-     * Affiche une liste de tous les produits de l'utilisateur connecté et de l'entreprise active.
-     */
     public function index()
     {
-        if (!Auth::check()) {
-            return redirect('/login')->withErrors('Veuillez vous connecter.');
+        $companyId = Session::get('active_company_id');
+        if (!$companyId) {
+            return redirect()->route('companies.index')->with('error', 'Veuillez sélectionner une entreprise.')->withInput();
         }
-
-        $userId = Auth::id();
-        $activeCompanyId = Session::get('active_company_id');
-
-        // Redirige si aucune entreprise n'est sélectionnée
-        if (!$activeCompanyId) {
-            return redirect()->route('companies.index')->withErrors('Veuillez sélectionner une entreprise pour gérer les produits.');
-        }
-
-        // Récupère tous les produits appartenant à l'utilisateur connecté ET à l'entreprise active
-        $products = Product::where('user_id', $userId)
-                           ->where('company_id', $activeCompanyId) // FILTRAGE PAR ENTREPRISE
-                           ->get();
-
-        return view('products.index', [
-            'products' => $products,
-        ]);
+        $products = Product::where('company_id', $companyId)->get();
+        return view('products.index', compact('products'));
     }
 
-    /**
-     * Affiche le formulaire de création d'un nouveau produit.
-     * Les catégories et unités listées sont également filtrées par l'utilisateur connecté et l'entreprise active.
-     */
-    public function create(Request $request)
+    public function create()
     {
-        if (!Auth::check()) {
-            return redirect('/login')->withErrors('Veuillez vous connecter.');
+        $companyId = Session::get('active_company_id');
+        if (!$companyId) {
+            return redirect()->route('companies.index')->with('error', 'Veuillez sélectionner une entreprise avant de créer un produit.')->withInput();
         }
 
-        $userId = Auth::id();
-        $activeCompanyId = Session::get('active_company_id');
+        $categories = Category::where('company_id', $companyId)->get();
+        $units = Unit::where('company_id', $companyId)->get();
 
-        // Redirige si aucune entreprise n'est sélectionnée
-        if (!$activeCompanyId) {
-            return redirect()->route('companies.index')->withErrors('Veuillez sélectionner une entreprise avant de créer un produit.');
-        }
-
-        // Récupère les catégories appartenant à l'utilisateur connecté ET à l'entreprise active
-        $categories = Category::where('user_id', $userId)
-                                ->where('company_id', $activeCompanyId) // FILTRAGE PAR ENTREPRISE
-                                ->get(['id', 'name']);
-        // Récupère les unités appartenant à l'utilisateur connecté ET à l'entreprise active
-        $units = Unit::where('user_id', $userId)
-                      ->where('company_id', $activeCompanyId) // FILTRAGE PAR ENTREPRISE
-                      ->get(['id', 'name']);
-
-        // Les filtres existants par 'category' ou 'unit' dans la requête GET
-        if ($request->has('category')) {
-            $categories = Category::where('user_id', $userId)
-                                  ->where('company_id', $activeCompanyId) // FILTRAGE PAR ENTREPRISE
-                                  ->whereSlug($request->get('category'))
-                                  ->get();
-        }
-
-        if ($request->has('unit')) {
-            $units = Unit::where('user_id', $userId)
-                          ->where('company_id', $activeCompanyId) // FILTRAGE PAR ENTREPRISE
-                          ->whereSlug($request->get('unit'))
-                          ->get();
-        }
-
-        return view('products.create', [
-            'categories' => $categories,
-            'units' => $units,
-        ]);
+        return view('products.create', compact('categories', 'units'));
     }
 
-    /**
-     * Stocke un nouveau produit dans la base de données, l'associant à l'utilisateur connecté et à l'entreprise active.
-     */
-    public function store(StoreProductRequest $request)
+    public function store(Request $request)
     {
-        if (!Auth::check()) {
-            return redirect('/login')->withErrors('Veuillez vous connecter.');
+        $companyId = Session::get('active_company_id');
+        if (!$companyId) {
+            return redirect()->back()->withErrors('Veuillez sélectionner une entreprise.')->withInput();
         }
 
-        $userId = Auth::id();
-        $activeCompanyId = Session::get('active_company_id');
+        $validatedData = $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'buying_price' => 'required|numeric|min:0',
+            'selling_price' => 'required|numeric|min:0',
+            'quantity' => 'required|integer|min:0',
+            'quantity_alert' => 'required|integer|min:0',
+            'category_id' => [
+                'required',
+                'integer',
+                Rule::exists('categories', 'id')->where(function ($query) use ($companyId) {
+                    return $query->where('company_id', $companyId);
+                }),
+            ],
+            'unit_id' => [
+                'required',
+                'integer',
+                Rule::exists('units', 'id')->where(function ($query) use ($companyId) {
+                    return $query->where('company_id', $companyId);
+                }),
+            ],
+            'tax' => 'nullable|numeric|min:0',
+            'tax_type' => 'nullable|string',
+            'notes' => 'nullable|string',
+            'image' => 'nullable|image|max:2048',
+        ]);
 
-        // Redirige si aucune entreprise n'est sélectionnée
-        if (!$activeCompanyId) {
-            return redirect()->route('companies.index')->withErrors('Veuillez sélectionner une entreprise avant de créer un produit.');
+        // --- DÉBUT DE LA LOGIQUE DE GÉNÉRATION DU CODE PRODUIT ---
+
+        // Récupérer la catégorie sélectionnée
+        $category = Category::findOrFail($validatedData['category_id']);
+
+        // Générer un préfixe basé sur les DEUX premières lettres du slug de la catégorie
+        // Convertir en majuscules pour le code
+        $categoryPrefix = strtoupper(substr(Str::slug($category->name), 0, 2));
+        if (empty($categoryPrefix)) {
+            // Fallback si le slug est trop court ou vide (improbable pour des noms de catégorie valides)
+            $categoryPrefix = 'PR'; // Préfixe par défaut si la catégorie ne fournit pas assez de lettres
         }
 
-        $code = $request->get('code');
+        // Trouver le dernier code produit existant avec ce préfixe dans la même entreprise
+        // On utilise 'orderByDesc('code')' pour s'assurer que le numéro le plus élevé est pris
+        $lastProduct = Product::where('company_id', $companyId)
+                              ->where('code', 'like', $categoryPrefix . '-%')
+                              ->orderByDesc('code')
+                              ->first();
 
-        // Vérification de sécurité : Assurer que la catégorie et l'unité soumises appartiennent bien à l'utilisateur ET à l'entreprise active
-        $category = null;
-        if ($request->has('category_id') && $request->category_id) {
-            $category = Category::where('id', $request->category_id)
-                                ->where('user_id', $userId)
-                                ->where('company_id', $activeCompanyId) // FILTRAGE PAR ENTREPRISE
-                                ->first();
-            if (!$category) {
-                return back()->withErrors(['category_id' => 'La catégorie sélectionnée n\'existe pas ou ne vous appartient pas / n\'appartient pas à l\'entreprise active.']);
+        $nextNumber = 1;
+        if ($lastProduct) {
+            // Extraire la partie numérique du code (ex: de 'EL-001' obtenir '001')
+            $parts = explode('-', $lastProduct->code);
+            // S'assurer qu'il y a une partie numérique et qu'elle est bien un nombre
+            if (count($parts) > 1 && is_numeric(end($parts))) {
+                $nextNumber = (int)end($parts) + 1;
             }
         }
 
-        $unit = Unit::where('id', $request->unit_id)
-                     ->where('user_id', $userId)
-                     ->where('company_id', $activeCompanyId) // FILTRAGE PAR ENTREPRISE
-                     ->first();
-        if (!$unit) {
-            return back()->withErrors(['unit_id' => 'L\'unité sélectionnée n\'existe pas ou ne vous appartient pas / n\'appartient pas à l\'entreprise active.']);
+        // Formater le prochain numéro avec des zéros en tête (ex: 001, 010, 123)
+        // J'ai conservé 3 chiffres pour le suffixe numérique, mais vous pouvez ajuster
+        $productCode = $categoryPrefix . '-' . str_pad($nextNumber, 3, '0', STR_PAD_LEFT);
+
+        // Ajouter le code généré aux données validées
+        $validatedData['code'] = $productCode;
+
+        // --- FIN DE LA LOGIQUE DE GÉNÉRATION DU CODE PRODUIT ---
+
+        $product = Product::create(array_merge($validatedData, [
+            'company_id' => $companyId, // Associe le produit à l'entreprise active
+            'slug' => Str::slug($validatedData['name']), // Assigner le slug du produit (basé sur le nom du produit)
+        ]));
+
+        if ($request->hasFile('image')) {
+            $file = $request->file('image');
+            $filename = hexdec(uniqid()) . '.' . $file->getClientOriginalExtension();
+            $file->storeAs('products/images', $filename, 'public');
+            $product->update(['product_image' => $filename]);
         }
 
-        // Si le code du produit existe déjà pour cet utilisateur et cette entreprise, générer un nouveau code unique
-        $existingProduct = Product::where('code', $code)
-                                  ->where('user_id', $userId)
-                                  ->where('company_id', $activeCompanyId) // FILTRAGE PAR ENTREPRISE
-                                  ->first();
-        if ($existingProduct) {
-            $newCode = $this->generateUniqueCode($userId, $activeCompanyId); // Passer l'ID utilisateur ET l'ID entreprise
-            $request->merge(['code' => $newCode]);
-        }
-        
-        try {
-            // Fusionne les données validées avec l'ID de l'utilisateur, l'ID de l'entreprise active et les IDs de catégorie/unité vérifiés
-            $productData = array_merge($request->validated(), [
-                'user_id' => $userId, // Associe le produit à l'utilisateur connecté
-                'company_id' => $activeCompanyId, // AJOUT : Associe le produit à l'entreprise active
-                'category_id' => $category ? $category->id : null, // Utilise l'ID de catégorie vérifié
-                'unit_id' => $unit->id, // Utilise l'ID d'unité vérifié
-            ]);
-
-            $product = Product::create($productData);
-
-            /**
-             * Gère le téléchargement d'une image
-             */
-            if ($request->hasFile('product_image')) {
-                $file = $request->file('product_image');
-                $filename = hexdec(uniqid()) . '.' . $file->getClientOriginalExtension();
-
-                // Valide le fichier avant le téléchargement
-                if ($file->isValid()) {
-                    $file->storeAs('products/', $filename, 'public');
-                    $product->update([
-                        'product_image' => $filename
-                    ]);
-                } else {
-                    return back()->withErrors(['product_image' => 'Fichier image invalide.']);
-                }
-            }
-
-            return redirect()
-                ->back()
-                ->with('success', 'Le produit a été créé avec le code : ' . $product->code);
-
-        } catch (\Exception $e) {
-            // Gérer les erreurs inattendues
-            \Log::error($e->getMessage() . " - " . $e->getTraceAsString()); // Log de l'erreur
-            return back()->withErrors(['error' => 'Une erreur est survenue lors de la création du produit.']);
-        }
+        return redirect()->route('products.index')->with('success', 'Produit créé avec succès!');
     }
 
-    /**
-     * Méthode d'aide pour générer un code produit unique pour un utilisateur et une entreprise donnés.
-     */
-    private function generateUniqueCode($userId, $companyId) // NOUVEAU : prend companyId en paramètre
-    {
-        do {
-            $code = 'PC' . strtoupper(uniqid());
-            // Vérifie l'unicité du code UNIQUEMENT pour les produits de cet utilisateur ET de cette entreprise
-        } while (Product::where('code', $code)->where('user_id', $userId)->where('company_id', $companyId)->exists());
-
-        return $code;
-    }
-
-    /**
-     * Affiche les détails d'un produit spécifique.
-     * S'assure que seul le propriétaire et l'entreprise active peuvent le voir.
-     */
     public function show(Product $product)
     {
-        // Vérifie si l'utilisateur connecté est le propriétaire du produit ET s'il appartient à l'entreprise active.
-        if (!Auth::check() || $product->user_id !== Auth::id() || $product->company_id !== Session::get('active_company_id')) {
+        if ($product->company_id !== Session::get('active_company_id')) {
             abort(403, 'Accès non autorisé à ce produit.');
         }
-
-        // Génère un code-barres
-        $generator = new BarcodeGeneratorHTML();
-        $barcode = $generator->getBarcode($product->code, $generator::TYPE_CODE_128);
-
-        return view('products.show', [
-            'product' => $product,
-            'barcode' => $barcode,
-        ]);
+        return view('products.show', compact('product'));
     }
 
-    /**
-     * Affiche le formulaire de modification d'un produit.
-     * S'assure que seul le propriétaire et l'entreprise active peuvent le modifier.
-     */
     public function edit(Product $product)
     {
-        // Vérifie si l'utilisateur connecté est le propriétaire du produit ET s'il appartient à l'entreprise active.
-        if (!Auth::check() || $product->user_id !== Auth::id() || $product->company_id !== Session::get('active_company_id')) {
+        if ($product->company_id !== Session::get('active_company_id')) {
             abort(403, 'Accès non autorisé à modifier ce produit.');
         }
 
-        $userId = Auth::id();
-        $activeCompanyId = Session::get('active_company_id');
+        $companyId = Session::get('active_company_id');
+        $categories = Category::where('company_id', $companyId)->get();
+        $units = Unit::where('company_id', $companyId)->get();
 
-        // Récupère les catégories et unités appartenant à l'utilisateur ET à l'entreprise active
-        return view('products.edit', [
-            'categories' => Category::where('user_id', $userId)
-                                     ->where('company_id', $activeCompanyId) // FILTRAGE PAR ENTREPRISE
-                                     ->get(),
-            'units' => Unit::where('user_id', $userId)
-                            ->where('company_id', $activeCompanyId) // FILTRAGE PAR ENTREPRISE
-                            ->get(),
-            'product' => $product
-        ]);
+        return view('products.edit', compact('product', 'categories', 'units'));
     }
 
-    /**
-     * Met à jour un produit existant.
-     * S'assure que seul le propriétaire et l'entreprise active peuvent le modifier.
-     */
-    public function update(UpdateProductRequest $request, Product $product)
+    public function update(Request $request, Product $product)
     {
-        // Vérifie si l'utilisateur connecté est le propriétaire du produit ET s'il appartient à l'entreprise active.
-        if (!Auth::check() || $product->user_id !== Auth::id() || $product->company_id !== Session::get('active_company_id')) {
+        if ($product->company_id !== Session::get('active_company_id')) {
             abort(403, 'Accès non autorisé à mettre à jour ce produit.');
         }
 
-        $userId = Auth::id();
-        $activeCompanyId = Session::get('active_company_id');
+        $companyId = Session::get('active_company_id');
+        $validatedData = $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'buying_price' => 'required|numeric|min:0',
+            'selling_price' => 'required|numeric|min:0',
+            'quantity' => 'required|integer|min:0',
+            'quantity_alert' => 'required|integer|min:0',
+            'category_id' => [
+                'required',
+                'integer',
+                Rule::exists('categories', 'id')->where(function ($query) use ($companyId) {
+                    return $query->where('company_id', $companyId);
+                }),
+            ],
+            'unit_id' => [
+                'required',
+                'integer',
+                Rule::exists('units', 'id')->where(function ($query) use ($companyId) {
+                    return $query->where('company_id', $companyId);
+                }),
+            ],
+            'tax' => 'nullable|numeric|min:0',
+            'tax_type' => 'nullable|string',
+            'notes' => 'nullable|string',
+            'image' => 'nullable|image|max:2048',
+            // Le code du produit n'est généralement pas modifiable après la création s'il est généré.
+            // Si vous souhaitez le rendre modifiable, ajoutez une validation ici,
+            // potentiellement avec une règle unique qui ignore l'ID actuel du produit.
+            // 'code' => ['required', 'string', Rule::unique('products')->ignore($product->id)->where(function ($query) use ($companyId) {
+            //     return $query->where('company_id', $companyId);
+            // })],
+        ]);
 
-        // Vérification de sécurité pour la catégorie et l'unité : doivent appartenir à l'utilisateur ET à l'entreprise active
-        $category = null;
-        if ($request->has('category_id') && $request->category_id) {
-            $category = Category::where('id', $request->category_id)
-                                ->where('user_id', $userId)
-                                ->where('company_id', $activeCompanyId) // FILTRAGE PAR ENTREPRISE
-                                ->first();
-            if (!$category) {
-                return back()->withErrors(['category_id' => 'La catégorie sélectionnée n\'existe pas ou ne vous appartient pas / n\'appartient pas à l\'entreprise active.']);
-            }
+        // Génération du slug du produit à partir du nouveau nom (si le nom a changé)
+        if ($request->input('name') !== $product->name) {
+            $slug = Str::slug($validatedData['name']);
+            $validatedData['slug'] = $slug;
         }
 
-        $unit = Unit::where('id', $request->unit_id)
-                     ->where('user_id', $userId)
-                     ->where('company_id', $activeCompanyId) // FILTRAGE PAR ENTREPRISE
-                     ->first();
-        if (!$unit) {
-            return back()->withErrors(['unit_id' => 'L\'unité sélectionnée n\'existe pas ou ne vous appartient pas / n\'appartient pas à l\'entreprise active.']);
-        }
+        $product->update($validatedData);
 
-        // Gérer la validation 'unique' pour le code produit: il doit être unique par entreprise.
-        // C'est souvent géré dans le FormRequest (UpdateProductRequest), mais si non, il faudrait le faire ici
-        // $request->validate([
-        //     'code' => 'nullable|string|unique:products,code,'.$product->id.',id,company_id,'.$activeCompanyId,
-        // ]);
-
-        // Utilise $request->validated() pour mettre à jour les données validées
-        $product->update($request->validated());
-
-        if ($request->hasFile('product_image')) {
-            // Supprime l'ancienne image si elle existe
+        if ($request->hasFile('image')) {
             if ($product->product_image) {
-                Storage::disk('public')->delete('products/' . $product->product_image);
+                \Illuminate\Support\Facades\Storage::disk('public')->delete('products/images/' . $product->product_image);
             }
-
-            // Prépare la nouvelle image
-            $file = $request->file('product_image');
-            $fileName = hexdec(uniqid()) . '.' . $file->getClientOriginalExtension();
-
-            // Stocke la nouvelle image dans le stockage public
-            $file->storeAs('products/', $fileName, 'public');
-
-            // Enregistre le nom de la nouvelle image en base de données
-            $product->update([
-                'product_image' => $fileName
-            ]);
-        } elseif ($request->input('product_image_removed')) { // Gère la suppression explicite de l'image
-            if ($product->product_image) {
-                Storage::disk('public')->delete('products/' . $product->product_image);
-                $product->update(['product_image' => null]);
-            }
+            $file = $request->file('image');
+            $filename = hexdec(uniqid()) . '.' . $file->getClientOriginalExtension();
+            $file->storeAs('products/images', $filename, 'public');
+            $product->update(['product_image' => $filename]);
         }
 
-        return redirect()
-            ->route('products.index')
-            ->with('success', 'Le produit a été mis à jour avec succès!');
+        return redirect()->route('products.index')->with('success', 'Produit mis à jour avec succès!');
     }
 
-    /**
-     * Supprime un produit.
-     * S'assure que seul le propriétaire et l'entreprise active peuvent le supprimer.
-     */
     public function destroy(Product $product)
     {
-        // Vérifie si l'utilisateur connecté est le propriétaire du produit ET s'il appartient à l'entreprise active.
-        if (!Auth::check() || $product->user_id !== Auth::id() || $product->company_id !== Session::get('active_company_id')) {
+        if ($product->company_id !== Session::get('active_company_id')) {
             abort(403, 'Accès non autorisé à supprimer ce produit.');
         }
 
-        /**
-         * Supprime la photo si elle existe.
-         */
         if ($product->product_image) {
-            Storage::disk('public')->delete('products/' . $product->product_image);
+            \Illuminate\Support\Facades\Storage::disk('public')->delete('products/images/' . $product->product_image);
         }
-
         $product->delete();
-
-        return redirect()
-            ->route('products.index')
-            ->with('success', 'Le produit a été supprimé avec succès!');
+        return redirect()->route('products.index')->with('success', 'Produit supprimé avec succès!');
     }
 }
