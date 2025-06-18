@@ -6,10 +6,10 @@
             <div class="row g-2 align-items-center">
                 <div class="col">
                     <div class="page-pretitle">
-                        Overview
+                        {{ __('dashboard.overview') }}
                     </div>
                     <h2 class="page-title">
-                        Dashboard
+                        {{ __('dashboard.dashboard') }}
                     </h2>
                 </div>
                 <!-- Page title actions -->
@@ -17,14 +17,14 @@
                     <div class="d-flex gap-2">
                         <a href="{{ route('products.create') }}" class="btn btn-primary d-none d-sm-inline-block">
                             <x-icon.plus/>
-                            Add new Product
+                            {{ __('dashboard.add_new_product') }}
                         </a>
                         <a href="{{ route('products.create') }}" class="btn btn-primary d-sm-none btn-icon" aria-label="Create new report">
                             <x-icon.plus/>
                         </a>
                         <a href="{{ route('orders.create') }}" class="btn btn-primary d-none d-sm-inline-block">
                             <x-icon.plus/>
-                            Create new order
+                            {{ __('dashboard.create_new_order') }}
                         </a>
                         <a href="{{ route('orders.create') }}" class="btn btn-primary d-sm-none btn-icon" aria-label="Create new report">
                             <x-icon.plus/>
@@ -52,10 +52,10 @@
                                         </div>
                                         <div class="col">
                                             <div class="font-weight-medium">
-                                                {{ $products }} Products
+                                                {{ $products }} {{ __('dashboard.products') }}
                                             </div>
                                             <div class="text-muted">
-                                                {{ $categories }} categories
+                                                {{ $categories }} {{ __('dashboard.categories') }}
                                             </div>
                                         </div>
                                     </div>
@@ -75,10 +75,10 @@
                                         </div>
                                         <div class="col">
                                             <div class="font-weight-medium">
-                                                {{ $orders }} Orders
+                                                {{ $orders }} {{ __('dashboard.orders') }}
                                             </div>
                                             <div class="text-muted">
-                                                {{ $completedOrders }} {{ __('completed') }}
+                                                {{ $completedOrders }} {{ __('dashboard.completed') }}
                                             </div>
                                         </div>
                                     </div>
@@ -98,10 +98,10 @@
                                         </div>
                                         <div class="col">
                                             <div class="font-weight-medium">
-                                                {{ $purchases }} Purchases
+                                                {{ $purchases }} {{ __('dashboard.purchases') }}
                                             </div>
                                             <div class="text-muted">
-                                                {{ $todayPurchases }} today
+                                                {{ $todayPurchases }} {{ __('dashboard.today') }}
                                             </div>
                                         </div>
                                     </div>
@@ -121,10 +121,10 @@
                                         </div>
                                         <div class="col">
                                             <div class="font-weight-medium">
-                                                {{ $quotations }} Quotations
+                                                {{ $quotations }} {{ __('dashboard.quotations') }}
                                             </div>
                                             <div class="text-muted">
-                                                {{ $todayQuotations }} today
+                                                {{ $todayQuotations }} {{ __('dashboard.today') }}
                                             </div>
                                         </div>
                                     </div>
