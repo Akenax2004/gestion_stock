@@ -82,4 +82,15 @@ class Product extends Model
     {
         return $this->hasMany(Company::class);
     }
+    protected static function booted(): void
+{
+    // static::addGlobalScope(new CompanyScope); // Si vous avez un Global Scope, assurez-vous qu'il est ici
+    static::creating(function ($product) {
+        if (auth()->check()) {
+            $product->user_id = auth()->id();
+            $product->company_id = session('active_company_id'); // S'assure que company_id est aussi assigné
+        }
+    });
+}
+
 }

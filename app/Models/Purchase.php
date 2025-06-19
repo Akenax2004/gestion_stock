@@ -25,6 +25,7 @@ class Purchase extends Model
         'total_amount',
         'created_by',
         'updated_by',
+        'user_id',
         'company_id', // AJOUTEZ CETTE LIGNE
     ];
 

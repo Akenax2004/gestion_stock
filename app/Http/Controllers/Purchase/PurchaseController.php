@@ -14,35 +14,29 @@ use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Auth; // Importez la façade Auth
 use Illuminate\Support\Facades\Session; // NOUVEAU : Importez la façade Session
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xls;
+use Illuminate\Support\Facades\Log; // Assurez-vous que Log est importé
 
 class PurchaseController extends Controller
 {
     /**
-     * Affiche une liste de tous les achats de l'utilisateur connecté et de l'entreprise active.
+     * Affiche une liste de tous les achats de l'utilisateur connecté.
      */
     public function index()
     {
-        if (!Auth::check()) {
-            return redirect('/login')->withErrors('Veuillez vous connecter.');
-        }
+        // Le middleware 'auth' garantit que l'utilisateur est connecté.
+        // Le middleware 'company.selected' garantit qu'une entreprise active est en session.
 
         $userId = Auth::id();
         $activeCompanyId = Session::get('active_company_id');
 
-        // Redirige si aucune entreprise n'est sélectionnée
-        if (!$activeCompanyId) {
-            return redirect()->route('companies.index')->withErrors('Veuillez sélectionner une entreprise pour gérer les achats.');
-        }
-
-        // Récupère uniquement les achats créés par l'utilisateur connecté ET appartenant à l'entreprise active
+        // Récupère uniquement les achats créés par l'utilisateur connecté et pour l'entreprise active
         $purchases = Purchase::where('created_by', $userId)
-                             ->where('company_id', $activeCompanyId) // FILTRAGE PAR ENTREPRISE
-                             ->latest()
-                             ->get();
+                             ->where('company_id', $activeCompanyId) // AJOUT : Filtrage par entreprise
+                             ->latest()->get();
 
         return view('purchases.index', [
             'purchases' => $purchases,
@@ -50,26 +44,20 @@ class PurchaseController extends Controller
     }
 
     /**
-     * Affiche une liste des achats approuvés par l'utilisateur connecté et l'entreprise active.
+     * Affiche une liste des achats approuvés par l'utilisateur connecté.
      */
     public function approvedPurchases()
     {
-        if (!Auth::check()) {
-            return redirect('/login')->withErrors('Veuillez vous connecter.');
-        }
+        // Le middleware 'auth' garantit que l'utilisateur est connecté.
+        // Le middleware 'company.selected' garantit qu'une entreprise active est en session.
 
         $userId = Auth::id();
         $activeCompanyId = Session::get('active_company_id');
 
-        // Redirige si aucune entreprise n'est sélectionnée
-        if (!$activeCompanyId) {
-            return redirect()->route('companies.index')->withErrors('Veuillez sélectionner une entreprise pour voir les achats approuvés.');
-        }
-
-        // Récupère les achats approuvés par l'utilisateur connecté ET appartenant à l'entreprise active
+        // Récupère les achats approuvés par l'utilisateur connecté et pour l'entreprise active
         $purchases = Purchase::with(['supplier'])
-            ->where('created_by', $userId)
-            ->where('company_id', $activeCompanyId) // FILTRAGE PAR ENTREPRISE
+            ->where('created_by', $userId) // Filtre par l'utilisateur créateur
+            ->where('company_id', $activeCompanyId) // AJOUT : Filtrage par entreprise
             ->where('status', PurchaseStatus::APPROVED)
             ->get();
 
@@ -92,8 +80,7 @@ class PurchaseController extends Controller
         // Charge les relations nécessaires
         $purchase->loadMissing(['supplier', 'details', 'createdBy', 'updatedBy']);
 
-        // Récupère les détails des produits pour cet achat.
-        // Puisque $purchase est déjà filtré par company_id, les détails sont implicitement liés.
+        // Récupère les détails des produits pour cet achat (qui sont déjà liés à l'achat parent filtré)
         $products = PurchaseDetails::where('purchase_id', $purchase->id)->get();
 
         return view('purchases.details-purchase', [
@@ -127,28 +114,25 @@ class PurchaseController extends Controller
      */
     public function create()
     {
-        if (!Auth::check()) {
-            return redirect('/login')->withErrors('Veuillez vous connecter.');
-        }
+        // Le middleware 'auth' garantit que l'utilisateur est connecté.
+        // Le middleware 'company.selected' garantit qu'une entreprise active est en session.
 
         $userId = Auth::id();
         $activeCompanyId = Session::get('active_company_id');
 
-        // Redirige si aucune entreprise n'est sélectionnée
-        if (!$activeCompanyId) {
-            return redirect()->route('companies.index')->withErrors('Veuillez sélectionner une entreprise avant de créer un achat.');
-        }
-
         return view('purchases.create', [
-            // Filtre les catégories et fournisseurs pour n'afficher que ceux de l'utilisateur connecté ET de l'entreprise active
+            // Filtre les catégories et fournisseurs pour n'afficher que ceux de l'utilisateur connecté
+            // ET de l'entreprise active.
             'categories' => Category::where('user_id', $userId)
-                                    ->where('company_id', $activeCompanyId) // FILTRAGE PAR ENTREPRISE
-                                    ->select(['id', 'name'])
-                                    ->get(),
+                                    ->where('company_id', $activeCompanyId) // AJOUT : Filtrage par entreprise
+                                    ->select(['id', 'name'])->get(),
             'suppliers' => Supplier::where('user_id', $userId)
-                                   ->where('company_id', $activeCompanyId) // FILTRAGE PAR ENTREPRISE
-                                   ->select(['id', 'name'])
-                                   ->get(),
+                                   ->where('company_id', $activeCompanyId) // AJOUT : Filtrage par entreprise
+                                   ->select(['id', 'name'])->get(),
+            'products' => Product::where('user_id', $userId) // Assurez-vous que les produits sont filtrés ici aussi
+                                  ->where('company_id', $activeCompanyId)
+                                  ->select(['id', 'name', 'code', 'buying_price', 'selling_price', 'quantity'])
+                                  ->get(),
         ]);
     }
 
@@ -157,50 +141,64 @@ class PurchaseController extends Controller
      */
     public function store(StorePurchaseRequest $request)
     {
-        if (!Auth::check()) {
-            return redirect('/login')->withErrors('Veuillez vous connecter.');
-        }
+        Log::info('Début de la méthode store dans PurchaseController.');
 
         $userId = Auth::id();
         $activeCompanyId = Session::get('active_company_id');
 
-        // Redirige si aucune entreprise n'est sélectionnée
-        if (!$activeCompanyId) {
-            return redirect()->route('companies.index')->withErrors('Veuillez sélectionner une entreprise avant de créer un achat.');
-        }
+        Log::info("Utilisateur ID: {$userId} - Entreprise active ID: {$activeCompanyId}.");
+        Log::info('Données de la requête validées: ' . json_encode($request->validated()));
+        Log::info('InvoiceProducts reçus de la requête: ' . json_encode($request->input('invoiceProducts')));
 
-        // Vérification de sécurité : Assurer que le fournisseur soumis appartient bien à l'utilisateur ET à l'entreprise active
+
+        // Vérification de sécurité : Assurer que le fournisseur soumis appartient bien à l'utilisateur
+        // ET à l'entreprise active.
         $supplier = Supplier::where('id', $request->supplier_id)
-                             ->where('user_id', $userId)
-                             ->where('company_id', $activeCompanyId) // FILTRAGE PAR ENTREPRISE
-                             ->first();
+                            ->where('user_id', $userId)
+                            ->where('company_id', $activeCompanyId)
+                            ->first();
         if (!$supplier) {
-            return back()->withErrors(['supplier_id' => 'Le fournisseur sélectionné n\'existe pas ou ne vous appartient pas / n\'appartient pas à l\'entreprise active.']);
+            Log::warning("Fournisseur non valide ou non propriétaire. ID fournisseur: {$request->supplier_id}, userId: {$userId}, companyId: {$activeCompanyId}.");
+            return back()->withErrors(['supplier_id' => 'Le fournisseur sélectionné n\'existe pas ou ne vous appartient pas ou n\'appartient pas à l\'entreprise active.']);
         }
+        Log::info("Fournisseur vérifié (ID: {$supplier->id}).");
 
-        DB::beginTransaction();
+
+        DB::beginTransaction(); // Démarre la transaction
+        Log::info('Transaction de base de données démarrée.');
 
         try {
-            // Crée l'achat en ajoutant l'ID de l'utilisateur créateur et l'ID de l'entreprise active
+            // Crée l'achat en ajoutant l'ID de l'utilisateur créateur et l'ID de l'entreprise active.
             $purchase = Purchase::create(array_merge($request->validated(), [
                 'created_by' => $userId,
                 'company_id' => $activeCompanyId, // AJOUT : Associe l'achat à l'entreprise active
                 'supplier_id' => $supplier->id,
             ]));
+            Log::info("Achat principal créé avec l'ID: {$purchase->id}.");
+
 
             if (!empty($request->invoiceProducts)) {
                 $pDetails = [];
 
                 foreach ($request->invoiceProducts as $productData) {
-                    // Vérification de sécurité : Assurer que le produit dans la liste appartient bien à l'utilisateur ET à l'entreprise active
+                    // Nettoyage et conversion de unitcost et total
+                    $productData['unitcost'] = str_replace(',', '.', $productData['unitcost']); // Remplace la virgule par un point
+                    $productData['unitcost'] = floatval($productData['unitcost']); // Convertit en float
+
+                    Log::info("Traitement du produit ID: {$productData['product_id']} pour l'achat. Qty: {$productData['quantity']}, UnitCost: {$productData['unitcost']}, Total: {$productData['total']}.");
+
+                    // Vérification de sécurité : Assurer que le produit dans la liste appartient bien à l'utilisateur
+                    // ET à l'entreprise active.
                     $product = Product::where('id', $productData['product_id'])
-                                        ->where('user_id', $userId)
-                                        ->where('company_id', $activeCompanyId) // FILTRAGE PAR ENTREPRISE
-                                        ->first();
+                                      ->where('user_id', $userId)
+                                      ->where('company_id', $activeCompanyId)
+                                      ->first();
                     if (!$product) {
-                        DB::rollBack();
+                        DB::rollBack(); // Annule la création de l'achat si un produit n'est pas valide
+                        Log::error("Produit non trouvé ou non propriétaire pour le produit ID: {$productData['product_id']}, userId: {$userId}, companyId: {$activeCompanyId}.");
                         return back()->withErrors('Un produit dans la liste n\'existe pas ou ne vous appartient pas / n\'appartient pas à l\'entreprise active.');
                     }
+                    Log::info("Produit vérifié (ID: {$product->id}).");
 
                     $pDetails[] = [
                         'purchase_id' => $purchase->id,
@@ -213,18 +211,22 @@ class PurchaseController extends Controller
                     ];
                 }
                 $purchase->details()->insert($pDetails);
+                Log::info('Détails des achats insérés en base de données.');
+            } else {
+                Log::warning('Aucun produit dans invoiceProducts. Les détails de l\'achat ne seront pas insérés.');
             }
 
-            DB::commit();
+            DB::commit(); // Confirme la transaction
+            Log::info('Transaction de base de données confirmée avec succès.');
 
             return redirect()
                 ->route('purchases.index')
                 ->with('success', 'L\'achat a été créé avec succès!');
 
         } catch (Exception $e) {
-            DB::rollBack();
-            \Log::error("Erreur lors de la création de l'achat : " . $e->getMessage() . "\n" . $e->getTraceAsString());
-            return back()->withErrors(['error' => 'Une erreur est survenue lors de la création de l\'achat.']);
+            DB::rollBack(); // Annule la transaction en cas d'erreur
+            Log::error("Erreur critique lors de la création de l'achat : " . $e->getMessage() . " - Trace: " . $e->getTraceAsString());
+            return back()->withErrors(['error' => 'Une erreur est survenue lors de la création de l\'achat. Veuillez réessayer. (Détails: ' . $e->getMessage() . ')']);
         }
     }
 
@@ -240,32 +242,33 @@ class PurchaseController extends Controller
         }
 
         DB::beginTransaction();
-
         try {
-            // Récupère les détails de l'achat
+            $userId = Auth::id();
+            $activeCompanyId = Session::get('active_company_id');
+
             $productsInPurchase = PurchaseDetails::where('purchase_id', $purchase->id)->get();
 
             foreach ($productsInPurchase as $productDetail) {
                 // Vérifier que le produit appartient à l'utilisateur ET à l'entreprise active avant de modifier la quantité
                 $product = Product::where('id', $productDetail->product_id)
-                                  ->where('user_id', Auth::id())
-                                  ->where('company_id', Session::get('active_company_id')) // FILTRAGE PAR ENTREPRISE
+                                  ->where('user_id', $userId)
+                                  ->where('company_id', $activeCompanyId) // AJOUT : Filtrage par entreprise
                                   ->first();
 
                 if ($product) {
                     // Augmente la quantité du produit en stock
                     $product->update(['quantity' => DB::raw('quantity+' . $productDetail->quantity)]);
                 } else {
-                    \Log::warning("Produit non trouvé ou non propriétaire pour la mise à jour de stock dans l'achat ID: {$purchase->id}, produit ID: {$productDetail->product_id}");
-                    DB::rollBack(); // Annule la transaction si un produit n'est pas valide
-                    return redirect()->back()->withErrors('Un produit lié à cet achat n\'existe pas ou ne vous appartient pas / n\'appartient pas à l\'entreprise active, impossible de mettre à jour le stock.');
+                    DB::rollBack();
+                    Log::warning("Produit non trouvé ou non propriétaire pour la mise à jour de stock dans l'achat ID: {$purchase->id}, produit ID: {$productDetail->product_id}, userId: {$userId}, companyId: {$activeCompanyId}.");
+                    return redirect()->back()->withErrors('Un produit lié à cet achat n\'existe pas ou ne vous appartient pas ou n\'appartient pas à l\'entreprise active, impossible de mettre à jour le stock.');
                 }
             }
 
             // Met à jour le statut de l'achat et l'utilisateur qui l'a mis à jour
             $purchase->update([
-                'status' => PurchaseStatus::APPROVED,
-                'updated_by' => Auth::id(),
+                'status' => PurchaseStatus::APPROVED, // 1 = approved
+                'updated_by' => $userId, // Utilise Auth::id()
             ]);
 
             DB::commit();
@@ -276,7 +279,7 @@ class PurchaseController extends Controller
 
         } catch (Exception $e) {
             DB::rollBack();
-            \Log::error("Erreur lors de l'approbation de l'achat: " . $e->getMessage() . "\n" . $e->getTraceAsString());
+            Log::error("Erreur lors de l'approbation de l'achat : " . $e->getMessage() . " - Trace: " . $e->getTraceAsString());
             return redirect()->back()->withErrors('Une erreur est survenue lors de l\'approbation de l\'achat. Veuillez réessayer.');
         }
     }
@@ -292,6 +295,14 @@ class PurchaseController extends Controller
             abort(403, 'Accès non autorisé à supprimer cet achat.');
         }
 
+        /**
+         * Supprime la photo si elle existe.
+         */
+        if($purchase->photo){ // Assurez-vous que Purchase a une colonne 'photo' si vous utilisez cette logique
+            // Storage::disk('public')->delete('purchases/' . $purchase->photo);
+            // Log::warning("La suppression de photo n'est pas gérée ici car le modèle Purchase n'a pas de colonne 'photo' dans le fillable. Si Purchase a une photo, la logique devrait être dans un trait ou un observer.");
+        }
+
         $purchase->delete();
 
         return redirect()
@@ -304,22 +315,16 @@ class PurchaseController extends Controller
      */
     public function dailyPurchaseReport()
     {
-        if (!Auth::check()) {
-            return redirect('/login')->withErrors('Veuillez vous connecter.');
-        }
+        // Le middleware 'auth' garantit que l'utilisateur est connecté.
+        // Le middleware 'company.selected' garantit qu'une entreprise active est en session.
 
         $userId = Auth::id();
         $activeCompanyId = Session::get('active_company_id');
 
-        // Redirige si aucune entreprise n'est sélectionnée
-        if (!$activeCompanyId) {
-            return redirect()->route('companies.index')->withErrors('Veuillez sélectionner une entreprise pour voir le rapport des achats quotidiens.');
-        }
-
         $purchases = Purchase::with(['supplier'])
-            ->where('created_by', $userId)
-            ->where('company_id', $activeCompanyId) // FILTRAGE PAR ENTREPRISE
-            ->whereDate('date', today())
+            ->where('created_by', $userId) // Filtre par l'utilisateur créateur
+            ->where('company_id', $activeCompanyId) // AJOUT : Filtrage par entreprise
+            ->where('date', today()->format('Y-m-d'))
             ->get();
 
         return view('purchases.daily-report', [
@@ -337,17 +342,11 @@ class PurchaseController extends Controller
      */
     public function exportPurchaseReport(Request $request)
     {
-        if (!Auth::check()) {
-            return redirect('/login')->withErrors('Veuillez vous connecter.');
-        }
+        // Le middleware 'auth' garantit que l'utilisateur est connecté.
+        // Le middleware 'company.selected' garantit qu'une entreprise active est en session.
 
         $userId = Auth::id();
         $activeCompanyId = Session::get('active_company_id');
-
-        // Redirige si aucune entreprise n'est sélectionnée
-        if (!$activeCompanyId) {
-            return redirect()->route('companies.index')->withErrors('Veuillez sélectionner une entreprise avant d\'exporter un rapport.');
-        }
 
         $rules = [
             'start_date' => 'required|string|date_format:Y-m-d',
@@ -366,7 +365,7 @@ class PurchaseController extends Controller
             ->join('suppliers', 'purchases.supplier_id', '=', 'suppliers.id') // Joignez la table des fournisseurs
             // AJOUT DU FILTRE PAR L'UTILISATEUR CRÉATEUR ET L'ENTREPRISE ACTIVE
             ->where('purchases.created_by', $userId)
-            ->where('purchases.company_id', $activeCompanyId) // FILTRAGE PAR ENTREPRISE
+            ->where('purchases.company_id', $activeCompanyId) // AJOUT : Filtrage par entreprise
             ->whereBetween('purchases.date', [$sDate, $eDate])
             ->where('purchases.status', PurchaseStatus::APPROVED)
             ->select(
@@ -428,7 +427,7 @@ class PurchaseController extends Controller
             $Excel_writer->save('php://output');
             exit();
         } catch (Exception $e) {
-            \Log::error("Erreur lors de l'exportation du rapport d'achat : " . $e->getMessage() . "\n" . $e->getTraceAsString());
+            Log::error("Erreur lors de l'exportation du rapport d'achat : " . $e->getMessage());
             return back()->withErrors(['error' => 'Une erreur est survenue lors de l\'exportation du rapport.']);
         }
     }
