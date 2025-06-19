@@ -27,6 +27,7 @@ class Supplier extends Model
         'account_holder',
         'account_number',
         'bank_name',
+        'user_id',
         'company_id', // AJOUTEZ CETTE LIGNE
     ];
 
