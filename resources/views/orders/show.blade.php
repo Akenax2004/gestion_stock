@@ -7,14 +7,13 @@
                 <div class="card-header">
                     <div>
                         <h3 class="card-title">
-                            {{ __('Order Details') }}
+                            {{ __('Détails de la commande') }}
                         </h3>
                     </div>
 
                     <div class="card-actions btn-actions">
                         <div class="dropdown">
-                            <a href="#" class="btn-action dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><!-- Download SVG icon from http://tabler-icons.io/i/dots-vertical -->
-                                <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M12 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path><path d="M12 19m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path><path d="M12 5m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path></svg>
+                            <a href="#" class="btn-action dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M12 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path><path d="M12 19m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path><path d="M12 5m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path></svg>
                             </a>
 
                             <div class="dropdown-menu dropdown-menu-end" style="">
@@ -24,11 +23,11 @@
                                         @method('put')
 
                                         <button type="submit" class="dropdown-item text-success"
-                                                onclick="return confirm('Are you sure you want to approve this order?')"
+                                                onclick="return confirm('Êtes-vous sûr de vouloir approuver cette commande ?')"
                                         >
                                             <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-check" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M5 12l5 5l10 -10" /></svg>
 
-                                            {{ __('Approve Order') }}
+                                            {{ __('Approuver la commande') }}
                                         </button>
                                     </form>
                                 @endif
@@ -43,7 +42,7 @@
                     <div class="row row-cards mb-3">
                         <div class="col">
                             <label for="order_date" class="form-label required">
-                                {{ __('Order Date') }}
+                                {{ __('Date de commande') }}
                             </label>
                             <input type="text"
                                    id="order_date"
@@ -55,7 +54,7 @@
 
                         <div class="col">
                             <label for="invoice_no" class="form-label required">
-                                {{ __('Invoice No.') }}
+                                {{ __('No. Facture') }}
                             </label>
                             <input type="text"
                                    id="invoice_no"
@@ -67,7 +66,7 @@
 
                         <div class="col">
                             <label for="customer" class="form-label required">
-                                {{ __('Customer') }}
+                                {{ __('Client') }}
                             </label>
                             <input type="text"
                                    id="customer"
@@ -79,7 +78,7 @@
 
                         <div class="col">
                             <label for="payment_type" class="form-label required">
-                                {{ __('Payment Type') }}
+                                {{ __('Type de paiement') }}
                             </label>
 
                             <input type="text" id="payment_type" class="form-control" value="{{ $order->payment_type }}" disabled>
@@ -92,10 +91,10 @@
                             <tr>
                                 <th scope="col" class="align-middle text-center">No.</th>
                                 <th scope="col" class="align-middle text-center">Photo</th>
-                                <th scope="col" class="align-middle text-center">Product Name</th>
-                                <th scope="col" class="align-middle text-center">Product Code</th>
-                                <th scope="col" class="align-middle text-center">Quantity</th>
-                                <th scope="col" class="align-middle text-center">Price</th>
+                                <th scope="col" class="align-middle text-center">Nom du produit</th>
+                                <th scope="col" class="align-middle text-center">Code produit</th>
+                                <th scope="col" class="align-middle text-center">Quantité</th>
+                                <th scope="col" class="align-middle text-center">Prix</th>
                                 <th scope="col" class="align-middle text-center">Total</th>
                             </tr>
                             </thead>
@@ -129,16 +128,16 @@
                             @endforeach
                             <tr>
                                 <td colspan="6" class="text-end">
-                                    Payed amount
+                                    Montant payé
                                 </td>
                                 <td class="text-center">{{ number_format($order->pay, 2) }}</td>
                             </tr>
                             <tr>
-                                <td colspan="6" class="text-end">Due</td>
+                                <td colspan="6" class="text-end">Dû</td>
                                 <td class="text-center">{{ number_format($order->due, 2) }}</td>
                             </tr>
                             <tr>
-                                <td colspan="6" class="text-end">VAT</td>
+                                <td colspan="6" class="text-end">TVA</td>
                                 <td class="text-center">{{ number_format($order->vat, 2) }}</td>
                             </tr>
                             <tr>
@@ -158,9 +157,9 @@
 
                             <button type="submit"
                                     class="btn btn-success"
-                                    onclick="return confirm('Are you sure you want to complete this order?')"
+                                    onclick="return confirm('Êtes-vous sûr de vouloir compléter cette commande ?')"
                             >
-                                {{ __('Complete Order') }}
+                                {{ __('Compléter la commande') }}
                             </button>
                         </form>
                     @endif

@@ -2,7 +2,7 @@
     <div class="card-header">
         <div>
             <h3 class="card-title">
-                {{ __('Orders') }}
+                Commandes
             </h3>
         </div>
 
@@ -14,21 +14,21 @@
     <div class="card-body border-bottom py-3">
         <div class="d-flex">
             <div class="text-secondary">
-                Show
+                Afficher
                 <div class="mx-2 d-inline-block">
-                    <select wire:model.live="perPage" class="form-select form-select-sm" aria-label="result per page">
+                    <select wire:model.live="perPage" class="form-select form-select-sm" aria-label="résultats par page">
                         <option value="5">5</option>
                         <option value="10">10</option>
                         <option value="15">15</option>
                         <option value="25">25</option>
                     </select>
                 </div>
-                entries
+                entrées
             </div>
             <div class="ms-auto text-secondary">
-                Search:
+                Rechercher :
                 <div class="ms-2 d-inline-block">
-                    <input type="text" wire:model.live="search" class="form-control form-control-sm" aria-label="Search invoice">
+                    <input type="text" wire:model.live="search" class="form-control form-control-sm" aria-label="Rechercher une facture">
                 </div>
             </div>
         </div>
@@ -41,46 +41,46 @@
             <thead class="thead-light">
                 <tr>
                     <th class="align-middle text-center w-1">
-                        {{ __('No.') }}
+                        N°
                     </th>
                     <th scope="col" class="align-middle text-center">
                         <a wire:click.prevent="sortBy('invoice_no')" href="#" role="button">
-                            {{ __('Invoice No.') }}
+                            N° de facture
                             @include('inclues._sort-icon', ['field' => 'invoice_no'])
                         </a>
                     </th>
                     <th scope="col" class="align-middle text-center">
                         <a wire:click.prevent="sortBy('customer_id')" href="#" role="button">
-                            {{ __('Customer') }}
+                            Client
                             @include('inclues._sort-icon', ['field' => 'customer_id'])
                         </a>
                     </th>
                     <th scope="col" class="align-middle text-center">
                         <a wire:click.prevent="sortBy('order_date')" href="#" role="button">
-                            {{ __('Date') }}
+                            Date
                             @include('inclues._sort-icon', ['field' => 'order_date'])
                         </a>
                     </th>
                     <th scope="col" class="align-middle text-center">
                         <a wire:click.prevent="sortBy('payment_type')" href="#" role="button">
-                            {{ __('Paymet') }}
+                            Paiement
                             @include('inclues._sort-icon', ['field' => 'payment_type'])
                         </a>
                     </th>
                     <th scope="col" class="align-middle text-center">
                         <a wire:click.prevent="sortBy('total')" href="#" role="button">
-                            {{ __('Total') }}
+                            Total
                             @include('inclues._sort-icon', ['field' => 'total'])
                         </a>
                     </th>
                     <th scope="col" class="align-middle text-center">
                         <a wire:click.prevent="sortBy('order_status')" href="#" role="button">
-                            {{ __('Status') }}
+                            Statut
                             @include('inclues._sort-icon', ['field' => 'order_status'])
                         </a>
                     </th>
                     <th scope="col" class="align-middle text-center">
-                        {{ __('Action') }}
+                        Action
                     </th>
                 </tr>
             </thead>
@@ -97,7 +97,7 @@
                         {{ $order->customer->name }}
                     </td>
                     <td class="align-middle text-center">
-                        {{ $order->order_date->format('d-m-Y') }}
+                        {{ $order->order_date->format('d/m/Y') }}
                     </td>
                     <td class="align-middle text-center">
                         {{ $order->payment_type }}
@@ -120,7 +120,7 @@
             @empty
                 <tr>
                     <td class="align-middle text-center" colspan="8">
-                        No results found
+                        Aucun résultat trouvé
                     </td>
                 </tr>
             @endforelse
@@ -130,7 +130,7 @@
 
     <div class="card-footer d-flex align-items-center">
         <p class="m-0 text-secondary">
-            Showing <span>{{ $orders->firstItem() }}</span> to <span>{{ $orders->lastItem() }}</span> of <span>{{ $orders->total() }}</span> entries
+            Affichage de <span>{{ $orders->firstItem() }}</span> à <span>{{ $orders->lastItem() }}</span> sur <span>{{ $orders->total() }}</span> entrées
         </p>
 
         <ul class="pagination m-0 ms-auto">

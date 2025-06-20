@@ -2,7 +2,7 @@
     <div class="card-header">
         <div>
             <h3 class="card-title">
-                {{ __('Customers') }}
+                Clients
             </h3>
         </div>
 
@@ -14,21 +14,21 @@
     <div class="card-body border-bottom py-3">
         <div class="d-flex">
             <div class="text-secondary">
-                Show
+                Afficher
                 <div class="mx-2 d-inline-block">
-                    <select wire:model.live="perPage" class="form-select form-select-sm" aria-label="result per page">
+                    <select wire:model.live="perPage" class="form-select form-select-sm" aria-label="résultats par page">
                         <option value="5">5</option>
                         <option value="10">10</option>
                         <option value="15">15</option>
                         <option value="25">25</option>
                     </select>
                 </div>
-                entries
+                entrées
             </div>
             <div class="ms-auto text-secondary">
-                Search:
+                Rechercher :
                 <div class="ms-2 d-inline-block">
-                    <input type="text" wire:model.live="search" class="form-control form-control-sm" aria-label="Search invoice">
+                    <input type="text" wire:model.live="search" class="form-control form-control-sm" aria-label="Rechercher un client">
                 </div>
             </div>
         </div>
@@ -41,22 +41,22 @@
             <thead class="thead-light">
             <tr>
                 <th class="align-middle text-center w-1">
-                    {{ __('No.') }}
+                    N°
                 </th>
                 <th scope="col" class="align-middle text-center">
                     <a wire:click.prevent="sortBy('name')" href="#" role="button">
-                        {{ __('Name') }}
+                        Nom
                         @include('inclues._sort-icon', ['field' => 'name'])
                     </a>
                 </th>
                 <th scope="col" class="align-middle text-center">
                     <a wire:click.prevent="sortBy('email')" href="#" role="button">
-                        {{ __('Email') }}
+                        Email
                         @include('inclues._sort-icon', ['field' => 'email'])
                     </a>
                 </th>
                 <th scope="col" class="align-middle text-center">
-                    {{ __('Action') }}
+                    Action
                 </th>
             </tr>
             </thead>
@@ -81,7 +81,7 @@
             @empty
                 <tr>
                     <td class="align-middle text-center" colspan="8">
-                        No results found
+                        Aucun résultat trouvé
                     </td>
                 </tr>
             @endforelse
@@ -91,7 +91,7 @@
 
     <div class="card-footer d-flex align-items-center">
         <p class="m-0 text-secondary">
-            Showing <span>{{ $customers->firstItem() }}</span> to <span>{{ $customers->lastItem() }}</span> of <span>{{ $customers->total() }}</span> entries
+            Affichage de <span>{{ $customers->firstItem() }}</span> à <span>{{ $customers->lastItem() }}</span> sur <span>{{ $customers->total() }}</span> entrées
         </p>
 
         <ul class="pagination m-0 ms-auto">

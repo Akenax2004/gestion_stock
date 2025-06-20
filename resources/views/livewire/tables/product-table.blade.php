@@ -2,7 +2,7 @@
     <div class="card-header">
         <div>
             <h3 class="card-title">
-                {{ __('Products') }}
+                Produits
             </h3>
         </div>
 
@@ -14,15 +14,15 @@
                 <div class="dropdown-menu dropdown-menu-end" style="">
                     <a href="{{ route('products.create') }}" class="dropdown-item">
                         <x-icon.plus/>
-                        {{ __('Create Product') }}
+                        Créer un produit
                     </a>
                     <a href="{{ route('products.import.view') }}" class="dropdown-item">
                         <x-icon.plus/>
-                        {{ __('Import Products') }}
+                        Importer des produits
                     </a>
                     <a href="{{ route('products.export.store') }}" class="dropdown-item">
                         <x-icon.plus/>
-                        {{ __('Export Products') }}
+                        Exporter des produits
                     </a>
                 </div>
             </div>
@@ -32,21 +32,21 @@
     <div class="card-body border-bottom py-3">
         <div class="d-flex">
             <div class="text-secondary">
-                Show
+                Afficher
                 <div class="mx-2 d-inline-block">
-                    <select wire:model.live="perPage" class="form-select form-select-sm" aria-label="result per page">
+                    <select wire:model.live="perPage" class="form-select form-select-sm" aria-label="résultats par page">
                         <option value="5">5</option>
                         <option value="10">10</option>
                         <option value="15">15</option>
                         <option value="25">25</option>
                     </select>
                 </div>
-                entries
+                entrées
             </div>
             <div class="ms-auto text-secondary">
-                Search:
+                Rechercher :
                 <div class="ms-2 d-inline-block">
-                    <input type="text" wire:model.live="search" class="form-control form-control-sm" aria-label="Search invoice">
+                    <input type="text" wire:model.live="search" class="form-control form-control-sm" aria-label="Rechercher un produit">
                 </div>
             </div>
         </div>
@@ -59,42 +59,42 @@
             <thead class="thead-light">
                 <tr>
                     <th class="align-middle text-center w-1">
-                        {{ __('No.') }}
+                        N°
                     </th>
                     <th scope="col" class="align-middle text-center">
                         <a wire:click.prevent="sortBy('name')" href="#" role="button">
-                            {{ __('Name') }}
+                            Nom
                             @include('inclues._sort-icon', ['field' => 'name'])
                         </a>
                     </th>
                     <th scope="col" class="align-middle text-center">
                         <a wire:click.prevent="sortBy('code')" href="#" role="button">
-                            {{ __('Code') }}
+                            Code
                             @include('inclues._sort-icon', ['field' => 'code'])
                         </a>
                     </th>
                     <th scope="col" class="align-middle text-center">
                         <a wire:click.prevent="sortBy('category_id')" href="#" role="button">
-                            {{ __('Category') }}
+                            Catégorie
                             @include('inclues._sort-icon', ['field' => 'category_id'])
                         </a>
                     </th>
                     <th scope="col" class="align-middle text-center">
                         <a wire:click.prevent="sortBy('quantity')" href="#" role="button">
-                            {{ __('Quantity') }}
+                            Quantité
                             @include('inclues._sort-icon', ['field' => 'quantity'])
                         </a>
                     </th>
 
                     <th scope="col" class="align-middle text-center">
                         <a wire:click.prevent="sortBy('quantity_alert')" href="#" role="button">
-                            {{ __('Quantity Alert') }}
+                            Alerte quantité
                             @include('inclues._sort-icon', ['field' => 'quantity_alert'])
                         </a>
                     </th>
 
                     <th scope="col" class="align-middle text-center">
-                        {{ __('Action') }}
+                        Action
                     </th>
                 </tr>
             </thead>
@@ -127,9 +127,9 @@
                     <script>
                         function getBgColor(quantity, quantity_alert) {
                             if (quantity_alert >= quantity) {
-                                return '#f8d7da'; // Red
+                                return '#f8d7da'; // Rouge
                             } else if (quantity_alert === quantity - 1 || quantity_alert === quantity - 2) {
-                                return '#fff70063'; // Yellow
+                                return '#fff70063'; // Jaune
                             } 
                             return 'transparent';
                         }
@@ -144,7 +144,7 @@
             @empty
                 <tr>
                     <td class="align-middle text-center" colspan="7">
-                        No results found
+                        Aucun résultat trouvé
                     </td>
                 </tr>
             @endforelse
@@ -154,8 +154,8 @@
 
     <div class="card-footer d-flex align-items-center">
         <p class="m-0 text-secondary">
-            Showing <span>{{ $products->firstItem() }}</span>
-            to <span>{{ $products->lastItem() }}</span> of <span>{{ $products->total() }}</span> entries
+            Affichage de <span>{{ $products->firstItem() }}</span>
+            à <span>{{ $products->lastItem() }}</span> sur <span>{{ $products->total() }}</span> entrées
         </p>
 
         <ul class="pagination m-0 ms-auto">

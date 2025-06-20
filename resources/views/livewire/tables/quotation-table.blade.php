@@ -2,7 +2,7 @@
     <div class="card-header">
         <div>
             <h3 class="card-title">
-                {{ __('Quotations') }}
+                {{ __('Devis') }}
             </h3>
         </div>
 
@@ -14,21 +14,21 @@
     <div class="card-body border-bottom py-3">
         <div class="d-flex">
             <div class="text-secondary">
-                Show
+                Afficher
                 <div class="mx-2 d-inline-block">
-                    <select wire:model.live="perPage" class="form-select form-select-sm" aria-label="result per page">
+                    <select wire:model.live="perPage" class="form-select form-select-sm" aria-label="résultats par page">
                         <option value="5">5</option>
                         <option value="10">10</option>
                         <option value="15">15</option>
                         <option value="25">25</option>
                     </select>
                 </div>
-                entries
+                entrées
             </div>
             <div class="ms-auto text-secondary">
-                Search:
+                Rechercher :
                 <div class="ms-2 d-inline-block">
-                    <input type="text" wire:model.live="search" class="form-control form-control-sm" aria-label="Search invoice">
+                    <input type="text" wire:model.live="search" class="form-control form-control-sm" aria-label="Rechercher devis">
                 </div>
             </div>
         </div>
@@ -41,11 +41,11 @@
             <thead class="thead-light">
             <tr>
                 <th class="align-middle text-center w-1">
-                    {{ __('No.') }}
+                    {{ __('N°') }}
                 </th>
                 <th scope="col" class="align-middle text-center">
                     <a wire:click.prevent="sortBy('reference')" href="#" role="button">
-                        {{ __('Quotation No.') }}
+                        {{ __('N° de devis') }}
                         @include('inclues._sort-icon', ['field' => 'reference'])
                     </a>
                 </th>
@@ -57,19 +57,19 @@
                 </th>
                 <th scope="col" class="align-middle text-center">
                     <a wire:click.prevent="sortBy('customer_name')" href="#" role="button">
-                        {{ __('Customer name') }}
+                        {{ __('Nom du client') }}
                         @include('inclues._sort-icon', ['field' => 'customer_name'])
                     </a>
                 </th>
                 <th scope="col" class="align-middle text-center">
                     <a wire:click.prevent="sortBy('total')" href="#" role="button">
-                        {{ __('Total amount') }}
+                        {{ __('Montant total') }}
                         @include('inclues._sort-icon', ['field' => 'total_amount'])
                     </a>
                 </th>
                 <th scope="col" class="align-middle text-center">
                     <a wire:click.prevent="sortBy('order_status')" href="#" role="button">
-                        {{ __('Status') }}
+                        {{ __('Statut') }}
                         @include('inclues._sort-icon', ['field' => 'order_status'])
                     </a>
                 </th>
@@ -110,7 +110,7 @@
             @empty
                 <tr>
                     <td class="align-middle text-center" colspan="8">
-                        No results found
+                        Aucun résultat trouvé
                     </td>
                 </tr>
             @endforelse
@@ -120,7 +120,7 @@
 
     <div class="card-footer d-flex align-items-center">
         <p class="m-0 text-secondary">
-            Showing <span>{{ $quotations->firstItem() }}</span> to <span>{{ $quotations->lastItem() }}</span> of <span>{{ $quotations->total() }}</span> entries
+            Affichage de <span>{{ $quotations->firstItem() }}</span> à <span>{{ $quotations->lastItem() }}</span> sur <span>{{ $quotations->total() }}</span> entrées
         </p>
 
         <ul class="pagination m-0 ms-auto">
@@ -128,4 +128,3 @@
         </ul>
     </div>
 </div>
-

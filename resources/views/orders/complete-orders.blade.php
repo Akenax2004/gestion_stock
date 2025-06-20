@@ -14,15 +14,15 @@
             </svg>
         </div>
         <p class="empty-title">
-            No orders found
+            Aucune commande trouvée
         </p>
         <p class="empty-subtitle text-secondary">
-            Try adjusting your search or filter to find what you're looking for.
+            Essayez d'ajuster votre recherche ou votre filtre pour trouver ce que vous cherchez.
         </p>
         <div class="empty-action">
             <a href="{{ route('orders.create') }}" class="btn btn-primary">
                 <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M12 5l0 14"></path><path d="M5 12l14 0"></path></svg>
-                Add your first Order
+                Ajouter votre première commande
             </a>
         </div>
     </div>
@@ -32,7 +32,7 @@
             <div class="card-header">
                 <div>
                     <h3 class="card-title">
-                        {{ __('Orders: Completed') }}
+                        {{ __('Commandes : Terminées') }}
                     </h3>
                 </div>
 
@@ -47,12 +47,12 @@
                     <thead class="thead-light">
                         <tr>
                             <th scope="col" class="text-center">{{ __('No.') }}</th>
-                            <th scope="col" class="text-center">{{ __('Invoice No.') }}</th>
-                            <th scope="col" class="text-center">{{ __('Customer') }}</th>
+                            <th scope="col" class="text-center">{{ __('No. Facture') }}</th>
+                            <th scope="col" class="text-center">{{ __('Client') }}</th>
                             <th scope="col" class="text-center">{{ __('Date') }}</th>
-                            <th scope="col" class="text-center">{{ __('Payment') }}</th>
+                            <th scope="col" class="text-center">{{ __('Paiement') }}</th>
                             <th scope="col" class="text-center">{{ __('Total') }}</th>
-                            <th scope="col" class="text-center">{{ __('Status') }}</th>
+                            <th scope="col" class="text-center">{{ __('Statut') }}</th>
                             <th scope="col" class="text-center">{{ __('Action') }}</th>
                         </tr>
                     </thead>

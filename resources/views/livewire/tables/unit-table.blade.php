@@ -2,7 +2,7 @@
     <div class="card-header">
         <div>
             <h3 class="card-title">
-                {{ __('Units') }}
+                {{ __('Unités') }}
             </h3>
         </div>
 
@@ -14,21 +14,21 @@
     <div class="card-body border-bottom py-3">
         <div class="d-flex">
             <div class="text-secondary">
-                Show
+                Afficher
                 <div class="mx-2 d-inline-block">
-                    <select wire:model.live="perPage" class="form-select form-select-sm" aria-label="result per page">
+                    <select wire:model.live="perPage" class="form-select form-select-sm" aria-label="résultats par page">
                         <option value="5">5</option>
                         <option value="10">10</option>
                         <option value="15">15</option>
                         <option value="25">25</option>
                     </select>
                 </div>
-                entries
+                entrées
             </div>
             <div class="ms-auto text-secondary">
-                Search:
+                Rechercher :
                 <div class="ms-2 d-inline-block">
-                    <input type="text" wire:model.live="search" class="form-control form-control-sm" aria-label="Search invoice">
+                    <input type="text" wire:model.live="search" class="form-control form-control-sm" aria-label="Rechercher unité">
                 </div>
             </div>
         </div>
@@ -41,29 +41,29 @@
             <thead class="thead-light">
             <tr>
                 <th class="align-middle text-center w-1">
-                    {{ __('No.') }}
+                    {{ __('N°') }}
                 </th>
                 <th scope="col" class="align-middle text-center">
                     <a wire:click.prevent="sortBy('name')" href="#" role="button">
-                        {{ __('Name') }}
+                        {{ __('Nom') }}
                         @include('inclues._sort-icon', ['field' => 'name'])
                     </a>
                 </th>
                 <th scope="col" class="align-middle text-center d-none d-sm-table-cell">
                     <a wire:click.prevent="sortBy('slug')" href="#" role="button">
-                        {{ __('Slug') }}
+                        {{ __('Identifiant') }}
                         @include('inclues._sort-icon', ['field' => 'slug'])
                     </a>
                 </th>
                 <th scope="col" class="align-middle text-center">
                     <a wire:click.prevent="sortBy('short_code')" href="#" role="button">
-                        {{ __('Short Code') }}
+                        {{ __('Code court') }}
                         @include('inclues._sort-icon', ['field' => 'short_code'])
                     </a>
                 </th>
                 {{-- AJOUTEZ CETTE NOUVELLE COLONNE POUR LES PRODUITS --}}
                 <th scope="col" class="align-middle text-center">
-                    {{ __('Associated Products') }}
+                    {{ __('Produits associés') }}
                 </th>
                 {{-- FIN DE LA NOUVELLE COLONNE --}}
                 <th scope="col" class="align-middle text-center">
@@ -104,7 +104,7 @@
             @empty
                 <tr>
                     <td class="align-middle text-center" colspan="9"> {{-- Notez le colspan augmenté à 9 pour la nouvelle colonne --}}
-                        No results found
+                        Aucun résultat trouvé
                     </td>
                 </tr>
             @endforelse
@@ -114,7 +114,7 @@
 
     <div class="card-footer d-flex align-items-center">
         <p class="m-0 text-secondary d-none d-sm-block">
-            Showing <span>{{ $units->firstItem() }}</span> to <span>{{ $units->lastItem() }}</span> of <span>{{ $units->total() }}</span> entries
+            Affichage de <span>{{ $units->firstItem() }}</span> à <span>{{ $units->lastItem() }}</span> sur <span>{{ $units->total() }}</span> entrées
         </p>
 
         <ul class="pagination m-0 ms-auto">

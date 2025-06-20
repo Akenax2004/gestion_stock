@@ -2,7 +2,7 @@
     <div class="card-header">
         <div>
             <h3 class="card-title">
-                {{ __('Purchases') }}
+                {{ __('Achats') }}
             </h3>
         </div>
 
@@ -14,21 +14,21 @@
     <div class="card-body border-bottom py-3">
         <div class="d-flex">
             <div class="text-secondary">
-                Show
+                Afficher
                 <div class="mx-2 d-inline-block">
-                    <select wire:model.live="perPage" class="form-select form-select-sm" aria-label="result per page">
+                    <select wire:model.live="perPage" class="form-select form-select-sm" aria-label="résultats par page">
                         <option value="5">5</option>
                         <option value="10">10</option>
                         <option value="15">15</option>
                         <option value="25">25</option>
                     </select>
                 </div>
-                entries
+                entrées
             </div>
             <div class="ms-auto text-secondary">
-                Search:
+                Rechercher :
                 <div class="ms-2 d-inline-block">
-                    <input type="text" wire:model.live="search" class="form-control form-control-sm" aria-label="Search invoice">
+                    <input type="text" wire:model.live="search" class="form-control form-control-sm" aria-label="Rechercher facture">
                 </div>
             </div>
         </div>
@@ -41,17 +41,17 @@
             <thead class="thead-light">
                 <tr>
                     <th class="align-middle text-center w-1">
-                        {{ __('No.') }}
+                        {{ __('N°') }}
                     </th>
                     <th scope="col" class="align-middle text-center">
                         <a wire:click.prevent="sortBy('purchase_no')" href="#" role="button">
-                            {{ __('Purchase No.') }}
+                            {{ __('N° d\'achat') }}
                             @include('inclues._sort-icon', ['field' => 'purchase_no'])
                         </a>
                     </th>
                     <th scope="col" class="align-middle text-center">
                         <a wire:click.prevent="sortBy('supplier_id')" href="#" role="button">
-                            {{ __('Supplier') }}
+                            {{ __('Fournisseur') }}
                             @include('inclues._sort-icon', ['field' => 'supplier_id'])
                         </a>
                     </th>
@@ -69,7 +69,7 @@
                     </th>
                     <th scope="col" class="align-middle text-center">
                         <a wire:click.prevent="sortBy('status')" href="#" role="button">
-                            {{ __('Status') }}
+                            {{ __('Statut') }}
                             @include('inclues._sort-icon', ['field' => 'status'])
                         </a>
                     </th>
@@ -100,7 +100,7 @@
                     @if ($purchase->status === \App\Enums\PurchaseStatus::APPROVED)
                         <td class="align-middle text-center">
                             <span class="badge bg-green text-white text-uppercase">
-                                {{ __('APPROVED') }}
+                                {{ __('APPROUVÉ') }}
                             </span>
                         </td>
                         <td class="align-middle text-center">
@@ -111,7 +111,7 @@
                     @else
                         <td class="align-middle text-center">
                             <span class="badge bg-orange text-white text-uppercase">
-                                {{ __('PENDING') }}
+                                {{ __('EN ATTENTE') }}
                             </span>
                         </td>
                         <td class="align-middle text-center" style="width: 5%">
@@ -124,7 +124,7 @@
                 @empty
                 <tr>
                     <td class="align-middle text-center" colspan="7">
-                        No results found
+                        Aucun résultat trouvé
                     </td>
                 </tr>
             @endforelse
@@ -134,8 +134,8 @@
 
     <div class="card-footer d-flex align-items-center">
         <p class="m-0 text-secondary">
-            Showing <span>{{ $purchases->firstItem() }}</span>
-            to <span>{{ $purchases->lastItem() }}</span> of <span>{{ $purchases->total() }}</span> entries
+            Affichage de <span>{{ $purchases->firstItem() }}</span>
+            à <span>{{ $purchases->lastItem() }}</span> sur <span>{{ $purchases->total() }}</span> entrées
         </p>
 
         <ul class="pagination m-0 ms-auto">
