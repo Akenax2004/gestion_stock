@@ -7,7 +7,7 @@
             <div class="card-header">
                 <div>
                     <h3 class="card-title">
-                        {{ __('Purchases: Approved') }}
+                        {{ __('Achats : Approuvés') }}
                     </h3>
                 </div>
 
@@ -22,11 +22,11 @@
                     <thead class="thead-light">
                         <tr>
                             <th scope="col" class="align-middle text-center w-1">No.</th>
-                            <th scope="col" class="align-middle text-center">Purchase</th>
-                            <th scope="col" class="align-middle text-center">Supplier</th>
+                            <th scope="col" class="align-middle text-center">Achat</th>
+                            <th scope="col" class="align-middle text-center">Fournisseur</th>
                             <th scope="col" class="align-middle text-center">Date</th>
                             <th scope="col" class="align-middle text-center">Total</th>
-                            <th scope="col" class="align-middle text-center">Status</th>
+                            <th scope="col" class="align-middle text-center">Statut</th>
                             <th scope="col" class="align-middle text-center">Action</th>
                         </tr>
                     </thead>
@@ -49,7 +49,7 @@
                                 {{ Number::currency($purchase->total_amount, 'EUR') }}
                             </td>
                             <td class="align-middle text-center">
-                                <span class="btn btn-{{ $purchase->purchase_status == 0 ? 'warning' : 'success' }} btn-sm text-uppercase">{{ $purchase->purchase_status == 0 ? 'pending' : 'approved' }}</span>
+                                <span class="btn btn-{{ $purchase->purchase_status == 0 ? 'warning' : 'success' }} btn-sm text-uppercase">{{ $purchase->purchase_status == 0 ? 'en attente' : 'approuvé' }}</span>
                             </td>
                             <td class="align-middle text-center">
                                 <a href="{{ route('purchases.show', $purchase) }}" class="btn btn-icon btn-outline-info">

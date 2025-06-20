@@ -9,7 +9,7 @@
             <x-card>
                 <x-slot:header>
                     <x-slot:title>
-                        {{ __('Import Products') }}
+                        {{ __('Importer des Produits') }}
                     </x-slot:title>
 
                     <x-slot:actions>
@@ -34,11 +34,11 @@
 
                 <x-slot:footer class="text-end">
                     <x-button type="submit">
-                        {{ __('Import') }}
+                        {{ __('Importer') }}
                     </x-button>
 
                     <x-button.back route="{{ route('products.index') }}">
-                        {{ __('Cancel') }}
+                        {{ __('Annuler') }}
                     </x-button.back>
                 </x-slot:footer>
             </x-card>

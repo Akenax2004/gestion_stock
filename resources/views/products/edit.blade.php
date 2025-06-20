@@ -6,7 +6,7 @@
         <div class="row g-2 align-items-center mb-3">
             <div class="col">
                 <h2 class="page-title">
-                    {{ __('Edit Product') }}
+                    {{ __('Modifier le Produit') }}
                 </h2>
             </div>
         </div>
@@ -28,12 +28,12 @@
                         <div class="card">
                             <div class="card-body">
                                 <h3 class="card-title">
-                                    {{ __('Product Image') }}
+                                    {{ __('Image du Produit') }}
                                 </h3>
 
                                 <img
                                     class="img-account-profile mb-2"
-                                    src="{{ $product->image ? asset('storage/products/images/'.$product->image) : asset('assets/img/products/default.webp') }}" {{-- Updated path for image --}}
+                                    src="{{ $product->image ? asset('storage/products/images/'.$product->image) : asset('assets/img/products/default.webp') }}"
                                     id="image-preview"
                                 >
 
@@ -45,12 +45,12 @@
                                     type="file"
                                     accept="image/*"
                                     id="image"
-                                    name="image" {{-- Changed from product_image to image, matching controller validation --}}
+                                    name="image"
                                     class="form-control @error('image') is-invalid @enderror"
                                     onchange="previewImage();"
                                 >
 
-                                @error('image') {{-- Changed from product_image to image --}}
+                                @error('image')
                                 <div class="invalid-feedback">
                                     {{ $message }}
                                 </div>
@@ -64,7 +64,7 @@
                         <div class="card">
                             <div class="card-body">
                                 <h3 class="card-title">
-                                    {{ __('Product Details') }}
+                                    {{ __('Détails du Produit') }}
                                 </h3>
 
                                 <div class="row row-cards">
@@ -81,7 +81,7 @@
                                                    class="form-control @error('name') is-invalid @enderror"
                                                    placeholder="Nom du produit"
                                                    value="{{ old('name', $product->name) }}"
-                                                   required {{-- Added required attribute --}}
+                                                   required
                                             >
 
                                             @error('name')
@@ -100,7 +100,6 @@
                                             </label>
 
                                             @if ($categories->count() === 1 && $categories->first())
-                                                {{-- Si une seule catégorie disponible, la sélectionner par défaut et la rendre lecture seule --}}
                                                 <select name="category_id" id="category_id"
                                                         class="form-select @error('category_id') is-invalid @enderror"
                                                         readonly
@@ -109,11 +108,11 @@
                                                         {{ $categories->first()->name }}
                                                     </option>
                                                 </select>
-                                                <input type="hidden" name="category_id" value="{{ $categories->first()->id }}"> {{-- Champ caché pour s'assurer que la valeur est soumise --}}
+                                                <input type="hidden" name="category_id" value="{{ $categories->first()->id }}">
                                             @else
                                                 <select name="category_id" id="category_id"
                                                         class="form-select @error('category_id') is-invalid @enderror"
-                                                        required {{-- Added required attribute --}}
+                                                        required
                                                 >
                                                     <option value="" disabled="">Sélectionner une catégorie:</option>
                                                     @foreach ($categories as $category)
@@ -139,7 +138,6 @@
                                             </label>
 
                                             @if ($units->count() === 1 && $units->first())
-                                                {{-- Si une seule unité disponible, la sélectionner par défaut et la rendre lecture seule --}}
                                                 <select name="unit_id" id="unit_id"
                                                         class="form-select @error('unit_id') is-invalid @enderror"
                                                         readonly
@@ -148,11 +146,11 @@
                                                         {{ $units->first()->name }}
                                                     </option>
                                                 </select>
-                                                <input type="hidden" name="unit_id" value="{{ $units->first()->id }}"> {{-- Champ caché pour s'assurer que la valeur est soumise --}}
+                                                <input type="hidden" name="unit_id" value="{{ $units->first()->id }}">
                                             @else
                                                 <select name="unit_id" id="unit_id"
                                                         class="form-select @error('unit_id') is-invalid @enderror"
-                                                        required {{-- Added required attribute --}}
+                                                        required
                                                 >
                                                     <option value="" disabled="">
                                                         Sélectionner une unité:
@@ -179,14 +177,14 @@
                                                 <span class="text-danger">*</span>
                                             </label>
 
-                                            <input type="number" {{-- Changed type to number --}}
+                                            <input type="number"
                                                    id="buying_price"
                                                    name="buying_price"
                                                    class="form-control @error('buying_price') is-invalid @enderror"
                                                    placeholder="0"
                                                    value="{{ old('buying_price', $product->buying_price) }}"
-                                                   step="0.01" min="0" {{-- Added step and min for currency --}}
-                                                   required {{-- Added required attribute --}}
+                                                   step="0.01" min="0"
+                                                   required
                                             >
 
                                             @error('buying_price')
@@ -204,14 +202,14 @@
                                                 <span class="text-danger">*</span>
                                             </label>
 
-                                            <input type="number" {{-- Changed type to number --}}
+                                            <input type="number"
                                                    id="selling_price"
                                                    name="selling_price"
                                                    class="form-control @error('selling_price') is-invalid @enderror"
                                                    placeholder="0"
                                                    value="{{ old('selling_price', $product->selling_price) }}"
-                                                   step="0.01" min="0" {{-- Added step and min for currency --}}
-                                                   required {{-- Added required attribute --}}
+                                                   step="0.01" min="0"
+                                                   required
                                             >
 
                                             @error('selling_price')
@@ -236,7 +234,7 @@
                                                    min="0"
                                                    value="{{ old('quantity', $product->quantity) }}"
                                                    placeholder="0"
-                                                   required {{-- Added required attribute --}}
+                                                   required
                                             >
 
                                             @error('quantity')
@@ -261,7 +259,7 @@
                                                    min="0"
                                                    placeholder="0"
                                                    value="{{ old('quantity_alert', $product->quantity_alert) }}"
-                                                   required {{-- Added required attribute --}}
+                                                   required
                                             >
 
                                             @error('quantity_alert')
@@ -285,7 +283,7 @@
                                                    min="0"
                                                    placeholder="0"
                                                    value="{{ old('tax', $product->tax) }}"
-                                                   step="0.01" {{-- Added step for tax --}}
+                                                   step="0.01"
                                             >
 
                                             @error('tax')
@@ -305,7 +303,7 @@
                                             <select name="tax_type" id="tax_type"
                                                     class="form-select @error('tax_type') is-invalid @enderror"
                                             >
-                                                <option value="">Sélectionner un type de taxe</option> {{-- Added empty option --}}
+                                                <option value="">Sélectionner un type de taxe</option>
                                                 @foreach(\App\Enums\TaxType::cases() as $taxType)
                                                 <option value="{{ $taxType->value }}" @selected(old('tax_type', $product->tax_type) == $taxType->value)>
                                                     {{ $taxType->label() }}
@@ -322,7 +320,7 @@
                                     </div>
 
                                     <div class="col-md-12">
-                                        <div class="mb-3"> {{-- Removed mb-0 as it's not needed here and can cause layout issues --}}
+                                        <div class="mb-3">
                                             <label for="notes" class="form-label">
                                                 Notes
                                             </label>

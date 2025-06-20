@@ -4,9 +4,9 @@
 <div class="page-body">
     @if($purchases->isEmpty())
     <x-empty
-        title="No purchases found"
-        message="Try adjusting your search or filter to find what you're looking for."
-        button_label="{{ __('Add your first Purchase') }}"
+        title="Aucun achat trouvé"
+        message="Essayez d'ajuster votre recherche ou votre filtre pour trouver ce que vous cherchez."
+        button_label="{{ __('Ajouter votre premier Achat') }}"
         button_route="{{ route('purchases.create') }}"
     />
     @else

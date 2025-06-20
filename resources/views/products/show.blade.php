@@ -6,7 +6,7 @@
         <div class="row g-2 align-items-center mb-3">
             <div class="col">
                 <h2 class="page-title">
-                    {{ __('Edit Product') }}
+                    {{ __('Modifier le Produit') }}
                 </h2>
             </div>
         </div>
@@ -24,7 +24,7 @@
                     <div class="card">
                         <div class="card-body">
                             <h3 class="card-title">
-                                {{ __('Product Image') }}
+                                {{ __('Image du Produit') }}
                             </h3>
 
                             <img class="img-account-profile mb-2" src="{{ asset('assets/img/products/default.webp') }}" alt="" id="image-preview" />
@@ -36,14 +36,14 @@
                     <div class="card">
                         <div class="card-header">
                             <h3 class="card-title">
-                                {{ __('Product Details') }}
+                                {{ __('Détails du Produit') }}
                             </h3>
                         </div>
                         <div class="table-responsive">
                             <table class="table table-bordered card-table table-vcenter text-nowrap datatable">
                                 <tbody>
                                     <tr>
-                                        <td>Name</td>
+                                        <td>Nom</td>
                                         <td>{{ $product->name }}</td>
                                     </tr>
                                     <tr>
@@ -55,11 +55,11 @@
                                         <td>{{ $product->code }}</td>
                                     </tr>
                                     <tr>
-                                        <td>Barcode</td>
+                                        <td>Code-barres</td>
                                         <td>{!! $barcode !!}</td>
                                     </tr>
                                     <tr>
-                                        <td>Category</td>
+                                        <td>Catégorie</td>
                                         <td>
                                             <a href="{{ route('categories.show', $product->category) }}" class="badge bg-blue-lt">
                                                 {{ $product->category->name }}
@@ -67,7 +67,7 @@
                                         </td>
                                     </tr>
                                     <tr>
-                                        <td>Unit</td>
+                                        <td>Unité</td>
                                         <td>
                                             <a href="{{ route('categories.show', $product->unit) }}" class="badge bg-blue-lt">
                                                 {{ $product->unit->short_code }}
@@ -76,11 +76,11 @@
                                     </tr>
 
                                     <tr>
-                                        <td>Quantity</td>
+                                        <td>Quantité</td>
                                         <td>{{ $product->quantity }}</td>
                                     </tr>
                                     <tr>
-                                        <td>Quantity Alert</td>
+                                        <td>Alerte Quantité</td>
                                         <td>
                                             <span class="badge bg-red-lt">
                                                 {{ $product->quantity_alert }}
@@ -89,15 +89,15 @@
                                     </tr>
 
                                     <tr>
-                                        <td>Buying Price</td>
+                                        <td>Prix d'Achat</td>
                                         <td>{{ $product->buying_price }}</td>
                                     </tr>
                                     <tr>
-                                        <td>Selling Price</td>
+                                        <td>Prix de Vente</td>
                                         <td>{{ $product->selling_price }}</td>
                                     </tr>
                                     <tr>
-                                        <td>Tax</td>
+                                        <td>Taxe</td>
                                         <td>
                                             <span class="badge bg-red-lt">
                                                 {{ $product->tax }} %
@@ -105,7 +105,7 @@
                                         </td>
                                     </tr>
                                     <tr>
-                                        <td>Tax Type</td>
+                                        <td>Type de Taxe</td>
                                         <td>{{ $product->tax_type->label() }}</td>
                                     </tr>
                                     <tr>
@@ -118,11 +118,11 @@
 
                         <div class="card-footer text-end">
                             <x-button.edit route="{{ route('products.edit', $product) }}">
-                                {{ __('Edit') }}
+                                {{ __('Modifier') }}
                             </x-button.edit>
 
                             <x-button.back route="{{ route('products.index') }}">
-                                {{ __('Cancel') }}
+                                {{ __('Annuler') }}
                             </x-button.back>
                         </div>
                     </div>

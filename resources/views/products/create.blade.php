@@ -6,7 +6,7 @@
         <div class="row g-2 align-items-center mb-3">
             <div class="col">
                 <h2 class="page-title">
-                    {{ __('Create Product') }}
+                    {{ __('Créer un Produit') }}
                 </h2>
             </div>
         </div>
@@ -28,7 +28,7 @@
                         <div class="card">
                             <div class="card-body">
                                 <h3 class="card-title">
-                                    {{ __('Product Image') }}
+                                    {{ __('Image du Produit') }}
                                 </h3>
 
                                 <img
@@ -45,12 +45,12 @@
                                     type="file"
                                     accept="image/*"
                                     id="image"
-                                    name="image" {{-- Changed from product_image to image, matching controller validation --}}
+                                    name="image"
                                     class="form-control @error('image') is-invalid @enderror"
                                     onchange="previewImage();"
                                 >
 
-                                @error('image') {{-- Changed from product_image to image --}}
+                                @error('image')
                                 <div class="invalid-feedback">
                                     {{ $message }}
                                 </div>
@@ -64,7 +64,7 @@
                             <div class="card-header">
                                 <div>
                                     <h3 class="card-title">
-                                        {{ __('Product Create') }}
+                                        {{ __('Créer un Produit') }}
                                     </h3>
                                 </div>
 
@@ -79,10 +79,10 @@
                                     <div class="col-md-12">
                                         <x-input name="name"
                                                  id="name"
-                                                 label="Nom du Produit" {{-- Added label for clarity --}}
+                                                 label="Nom du Produit"
                                                  placeholder="Nom du produit"
                                                  value="{{ old('name') }}"
-                                                 required="true" {{-- Added required as it's often required --}}
+                                                 required="true"
                                         />
                                     </div>
 
@@ -94,7 +94,6 @@
                                             </label>
 
                                             @if ($categories->count() === 1 && $categories->first())
-                                                {{-- Si une seule catégorie disponible, la sélectionner par défaut et la rendre lecture seule --}}
                                                 <select name="category_id" id="category_id"
                                                         class="form-select @error('category_id') is-invalid @enderror"
                                                         readonly
@@ -103,11 +102,11 @@
                                                         {{ $categories->first()->name }}
                                                     </option>
                                                 </select>
-                                                <input type="hidden" name="category_id" value="{{ $categories->first()->id }}"> {{-- Champ caché pour s'assurer que la valeur est soumise --}}
+                                                <input type="hidden" name="category_id" value="{{ $categories->first()->id }}">
                                             @else
                                                 <select name="category_id" id="category_id"
                                                         class="form-select @error('category_id') is-invalid @enderror"
-                                                        required {{-- Added required attribute --}}
+                                                        required
                                                 >
                                                     <option value="" selected="" disabled="">
                                                         Sélectionner une catégorie:
@@ -137,8 +136,7 @@
                                             </label>
 
                                             @if ($units->count() === 1 && $units->first())
-                                                {{-- Si une seule unité disponible, la sélectionner par défaut et la rendre lecture seule --}}
-                                                <select name="unit_id" id="unit_id" {{-- CORRECTED NAME HERE: unit_id --}}
+                                                <select name="unit_id" id="unit_id"
                                                         class="form-select @error('unit_id') is-invalid @enderror"
                                                         readonly
                                                 >
@@ -146,11 +144,11 @@
                                                         {{ $units->first()->name }}
                                                     </option>
                                                 </select>
-                                                <input type="hidden" name="unit_id" value="{{ $units->first()->id }}"> {{-- Champ caché pour s'assurer que la valeur est soumise --}}
+                                                <input type="hidden" name="unit_id" value="{{ $units->first()->id }}">
                                             @else
-                                                <select name="unit_id" id="unit_id" {{-- CORRECTED NAME HERE: unit_id --}}
+                                                <select name="unit_id" id="unit_id"
                                                         class="form-select @error('unit_id') is-invalid @enderror"
-                                                        required {{-- Added required attribute --}}
+                                                        required
                                                 >
                                                     <option value="" selected="" disabled="">
                                                         Sélectionner une unité:

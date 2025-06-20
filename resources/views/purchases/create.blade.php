@@ -17,14 +17,13 @@
                             <div class="card-header">
                                 <div>
                                     <h3 class="card-title">
-                                        {{ __('Create Purchase') }}
+                                        {{ __('Créer un Achat') }}
                                     </h3>
                                 </div>
 
                                 <div class="card-actions btn-actions">
                                     <div class="dropdown">
-                                        <a href="#" class="btn-action dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><!-- Download SVG icon from http://tabler-icons.io/i/dots-vertical -->
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M12 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path><path d="M12 19m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path><path d="M12 5m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path></svg>
+                                        <a href="#" class="btn-action dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M12 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path><path d="M12 19m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path><path d="M12 5m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path></svg>
                                         </a>
                                         <div class="dropdown-menu dropdown-menu-end" style="">
                                             {{--- ---}}
@@ -42,7 +41,7 @@
                                 <div class="row gx-3 mb-3">
                                     <div class="col-md-4">
                                         <label for="date" class="form-label required">
-                                            {{ __('Purchase Date') }}
+                                            {{ __('Date d\'achat') }}
                                         </label>
 
                                         <input name="date" id="date" type="date"
@@ -62,16 +61,16 @@
 
 
                                     <x-tom-select
-                                        label="Suppliers"
+                                        label="Fournisseurs"
                                         id="supplier_id"
                                         name="supplier_id"
-                                        placeholder="Select Supplier"
+                                        placeholder="Sélectionner le Fournisseur"
                                         :data="$suppliers"
                                     />
 
                                     <div class="col-md-4">
                                         <label for="reference" class="form-label required">
-                                            {{ __('Reference') }}
+                                            {{ __('Référence') }}
                                         </label>
 
                                         <input type="text" class="form-control"
@@ -96,7 +95,7 @@
                                 {{--- onclick="return confirm('Are you sure you want to purchase?')" ---}}
                                 {{--- @disabled($errors->isNotEmpty()) ---}}
                                 <button type="submit" class="btn btn-primary">
-                                    {{ __('Purchase') }}
+                                    {{ __('Acheter') }}
                                 </button>
                             </div>
                         </div>

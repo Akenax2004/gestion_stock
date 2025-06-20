@@ -7,14 +7,13 @@
             <div class="card-header">
                 <div>
                     <h3 class="card-title">
-                        {{ __('Purchase Edit') }}
+                        {{ __('Modification de l\'Achat') }}
                     </h3>
                 </div>
 
                 <div class="card-actions btn-actions">
                     <div class="dropdown">
                         <a href="#" class="btn-action dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            <!-- Download SVG icon from http://tabler-icons.io/i/dots-vertical -->
                             <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M12 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path><path d="M12 19m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path><path d="M12 5m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path></svg>
                         </a>
                         <div class="dropdown-menu dropdown-menu-end" style="">
@@ -31,7 +30,7 @@
             <div class="card-body">
                 <div class="row gx-3 mb-3">
                     <div class="col-md-6">
-                        <label class="small mb-1">Name</label>
+                        <label class="small mb-1">Nom</label>
                         <div class="form-control form-control-solid">{{ $purchase->supplier->name }}</div>
                     </div>
                     <div class="col-md-6">
@@ -41,17 +40,17 @@
                 </div>
                 <div class="row gx-3 mb-3">
                     <div class="col-md-6">
-                        <label class="small mb-1">Phone</label>
+                        <label class="small mb-1">Téléphone</label>
                         <div class="form-control form-control-solid">{{ $purchase->supplier->phone }}</div>
                     </div>
                     <div class="col-md-6">
-                        <label class="small mb-1">Order Date</label>
+                        <label class="small mb-1">Date de Commande</label>
                         <div class="form-control form-control-solid">{{ $purchase->purchase_date ? $purchase->purchase_date->format('d-m-Y') : 'N/A' }}</div>
                     </div>
                 </div>
                 <div class="row gx-3 mb-3">
                     <div class="col-md-6">
-                        <label class="small mb-1">No Purchase</label>
+                        <label class="small mb-1">No. Achat</label>
                         <div class="form-control">{{ $purchase->purchase_no }}</div>
                     </div>
                     <div class="col-md-6">
@@ -61,16 +60,16 @@
                 </div>
                 <div class="row gx-3 mb-3">
                     <div class="col-md-6">
-                        <label class="small mb-1">Created By</label>
+                        <label class="small mb-1">Créé par</label>
                         <div class="form-control form-control-solid">{{ $purchase->createdBy->name ?? '-' }}</div>
                     </div>
                     <div class="col-md-6">
-                        <label class="small mb-1">Updated By</label>
+                        <label class="small mb-1">Mis à jour par</label>
                         <div class="form-control form-control-solid">{{ $purchase->updatedBy->name ?? '-' }}</div>
                     </div>
                 </div>
                 <div class="mb-3">
-                    <label  class="small mb-1">Address</label>
+                    <label  class="small mb-1">Adresse</label>
                     <div class="form-control form-control-solid">{{ $purchase->supplier->address }}</div>
                 </div>
             </div>
@@ -84,9 +83,9 @@
 
                         <button type="submit"
                                 class="btn btn-success"
-                                onclick="return confirm('Are you sure you want to approve this purchase?')"
+                                onclick="return confirm('Êtes-vous sûr de vouloir approuver cet achat ?')"
                         >
-                            {{ __('Approve Purchase') }}
+                            {{ __('Approuver l\'Achat') }}
                         </button>
                     </form>
                 @endif
@@ -97,7 +96,7 @@
             <div class="col-lg-12">
                 <div class="card mb-4 mb-xl-0">
                     <div class="card-header">
-                        List Product
+                        Liste des Produits
                     </div>
 
                     <div class="card-body">
@@ -108,11 +107,11 @@
                                         <tr>
                                             <th scope="col">No.</th>
                                             <th scope="col">Photo</th>
-                                            <th scope="col">Product Name</th>
-                                            <th scope="col">Product Code</th>
-                                            <th scope="col">Current Stock</th>
-                                            <th scope="col">Quantity</th>
-                                            <th scope="col">Price</th>
+                                            <th scope="col">Nom du Produit</th>
+                                            <th scope="col">Code Produit</th>
+                                            <th scope="col">Stock Actuel</th>
+                                            <th scope="col">Quantité</th>
+                                            <th scope="col">Prix</th>
                                             <th scope="col">Total</th>
                                         </tr>
                                     </thead>

@@ -5,8 +5,8 @@
     <x-alert/>
 
     <nav class="nav nav-borders">
-        <a class="nav-link active ms-0" href="{{ route('profile.edit') }}">Profile</a>
-        <a class="nav-link" href="{{ route('profile.settings') }}">Settings</a>
+        <a class="nav-link active ms-0" href="{{ route('profile.edit') }}">Profil</a>
+        <a class="nav-link" href="{{ route('profile.settings') }}">Paramètres</a>
     </nav>
 
     <hr class="mt-0 mb-4" />
@@ -20,7 +20,7 @@
                 <div class="card">
                     <div class="card-body">
                         <h3 class="card-title">
-                            {{ __('Profile Image') }}
+                            {{ __('Image de profil') }}
                         </h3>
 
                         <img
@@ -29,7 +29,7 @@
                             id="image-preview"
                         />
 
-                        <div class="small font-italic text-muted mb-2">JPG or PNG no larger than 1 MB</div>
+                        <div class="small font-italic text-muted mb-2">JPG ou PNG, max 1 Mo</div>
 
                         <input class="form-control @error('photo') is-invalid @enderror" type="file"  id="image" name="photo" accept="image/*" onchange="previewImage();">
 
@@ -46,23 +46,23 @@
                 <div class="card">
                     <div class="card-body">
                         <h3 class="card-title">
-                            {{ __('Supplier Details') }}
+                            {{ __('Détails du fournisseur') }}
                         </h3>
 
-                        <x-input name="name" value="{{ old('name', $user->name) }}" :required="true" />
+                        <x-input name="name" value="{{ old('name', $user->name) }}" label="Nom" :required="true" />
 
-                        <x-input name="email" label="Email address" value="{{ old('email', $user->email) }}"  :required="true" />
+                        <x-input name="email" label="Adresse e-mail" value="{{ old('email', $user->email) }}"  :required="true" />
 
-                        <x-input name="username" value="{{ old('username', $user->username) }}" :required="true" />
+                        <x-input name="username" label="Nom d'utilisateur" value="{{ old('username', $user->username) }}" :required="true" />
                     </div>
 
                     <div class="card-footer text-end">
                         <x-button.save type="submit">
-                            {{ __('Update') }}
+                            {{ __('Mettre à jour') }}
                         </x-button.save>
 
                         <x-button.back route="{{ route('dashboard') }}">
-                            {{ __('Cancel') }}
+                            {{ __('Annuler') }}
                         </x-button.back>
                     </div>
                 </div>

@@ -13,7 +13,7 @@
                                 <polyline points="13 2 13 9 20 9"></polyline>
                             </svg>
                         </div>
-                        Daily Purchase Report - {{ today()->format('d-m-Y') }}
+                        Rapport d'achat quotidien - {{ today()->format('d-m-Y') }}
                     </h1>
                 </div>
             </div>
@@ -26,7 +26,7 @@
         <div class="col-xl-12">
             <div class="card mb-4">
                 <div class="card-header">
-                    List of Purchases
+                    Liste des Achats
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
@@ -34,11 +34,11 @@
                             <thead class="thead-light">
                                 <tr>
                                     <th scope="col">No.</th>
-                                    <th scope="col">Supplier Name</th>
-                                    <th scope="col">Purchase No.</th>
+                                    <th scope="col">Nom du Fournisseur</th>
+                                    <th scope="col">No. d'Achat</th>
                                     <th scope="col">Date</th>
-                                    <th scope="col">Total Amount</th>
-                                    <th scope="col">Status</th>
+                                    <th scope="col">Montant Total</th>
+                                    <th scope="col">Statut</th>
                                     <th scope="col">Actions</th>
                                 </tr>
                             </thead>
@@ -52,19 +52,19 @@
                                     <td>{{ $purchase->total_amount }}</td>
                                     <td>
                                         @if ($purchase->purchase_status == 1)
-                                            <span class="btn btn-success">Approved</span>
+                                            <span class="btn btn-success">Approuvé</span>
                                         @else
-                                            <span class="btn btn-warning">Pending</span>
+                                            <span class="btn btn-warning">En attente</span>
                                         @endif
                                     </td>
                                     <td>
-                                        <a href="{{ route('purchases.show', $purchase->id) }}" class="btn btn-primary btn-sm">View Details</a>
+                                        <a href="{{ route('purchases.show', $purchase->id) }}" class="btn btn-primary btn-sm">Voir les détails</a>
                                     </td>
                                 </tr>
                                 @empty
                                     <tr>
                                         <td class="align-middle text-center" colspan="7">
-                                            No results found
+                                            Aucun résultat trouvé
                                         </td>
                                     </tr>
                                 @endforelse

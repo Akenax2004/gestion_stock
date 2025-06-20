@@ -4,9 +4,9 @@
 <div class="page-body">
     @if($products->isEmpty())
         <x-empty
-            title="No products found"
-            message="Try adjusting your search or filter to find what you're looking for."
-            button_label="{{ __('Add your first Product') }}"
+            title="Aucun produit trouvé"
+            message="Essayez d'ajuster votre recherche ou votre filtre pour trouver ce que vous cherchez."
+            button_label="{{ __('Ajouter votre premier Produit') }}"
             button_route="{{ route('products.create') }}"
         />
     @else
