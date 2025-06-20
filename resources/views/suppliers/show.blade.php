@@ -6,7 +6,7 @@
         <div class="row g-2 align-items-center mb-3">
             <div class="col">
                 <h2 class="page-title">
-                    {{ __('Edit Supplier') }}
+                    {{ __('Modifier le fournisseur') }}
                 </h2>
             </div>
         </div>
@@ -22,7 +22,7 @@
                 <div class="card">
                     <div class="card-body">
                         <h3 class="card-title">
-                            {{ __('Profile Image') }}
+                            {{ __('Image de profil') }}
                         </h3>
 
                         <img
@@ -39,7 +39,7 @@
                     <div class="card-header">
                         <div>
                             <h3 class="card-title">
-                                {{ __('Supplier Details') }}
+                                {{ __('Détails du fournisseur') }}
                             </h3>
                         </div>
 
@@ -51,39 +51,39 @@
                         <table class="table table-bordered card-table table-vcenter text-nowrap datatable">
                             <tbody>
                                 <tr>
-                                    <td>Name</td>
+                                    <td>{{ __('Nom') }}</td>
                                     <td>{{ $supplier->name }}</td>
                                 </tr>
                                 <tr>
-                                    <td>Email address</td>
+                                    <td>{{ __('Adresse e-mail') }}</td>
                                     <td>{{ $supplier->email }}</td>
                                 </tr>
                                 <tr>
-                                    <td>Phone number</td>
+                                    <td>{{ __('Numéro de téléphone') }}</td>
                                     <td>{{ $supplier->phone }}</td>
                                 </tr>
                                 <tr>
-                                    <td>Address</td>
+                                    <td>{{ __('Adresse') }}</td>
                                     <td>{{ $supplier->address }}</td>
                                 </tr>
                                 <tr>
-                                    <td>Shop name</td>
+                                    <td>{{ __('Nom de la boutique') }}</td>
                                     <td>{{ $supplier->shopname }}</td>
                                 </tr>
                                 <tr>
-                                    <td>Type</td>
+                                    <td>{{ __('Type') }}</td>
                                     <td>{{ $supplier->type->label() }}</td>
                                 </tr>
                                 <tr>
-                                    <td>Account holder</td>
+                                    <td>{{ __('Titulaire du compte') }}</td>
                                     <td>{{ $supplier->account_holder }}</td>
                                 </tr>
                                 <tr>
-                                    <td>Account number</td>
+                                    <td>{{ __('Numéro de compte') }}</td>
                                     <td>{{ $supplier->account_number }}</td>
                                 </tr>
                                 <tr>
-                                    <td>Bank name</td>
+                                    <td>{{ __('Nom de la banque') }}</td>
                                     <td>{{ $supplier->bank_name }}</td>
                                 </tr>
                             </tbody>
@@ -92,10 +92,10 @@
 
                     <div class="card-footer text-end">
                         <x-button.edit route="{{ route('suppliers.edit', $supplier) }}">
-                            {{ __('Edit') }}
+                            {{ __('Modifier') }}
                         </x-button.edit>
                         <x-button.back route="{{ route('suppliers.index') }}">
-                            {{ __('Back') }}
+                            {{ __('Retour') }}
                         </x-button.back>
                     </div>
                 </div>

@@ -6,7 +6,7 @@
         <div class="row g-2 align-items-center mb-3">
             <div class="col">
                 <h2 class="page-title">
-                    {{ __('Edit User') }}
+                    {{ __('Modifier l\'utilisateur') }}
                 </h2>
             </div>
         </div>
@@ -25,12 +25,12 @@
                         <div class="card">
                             <div class="card-body">
                                 <h3 class="card-title">
-                                    {{ __('Profile Image') }}
+                                    {{ __('Image de profil') }}
                                 </h3>
 
                                 <img class="img-account-profile mb-2" src="{{ $user->photo ? asset('storage/profile/'.$user->photo) : asset('assets/img/demo/user-placeholder.svg') }}" alt="" id="image-preview" />
 
-                                <div class="small font-italic text-muted mb-2">JPG or PNG no larger than 1 MB</div>
+                                <div class="small font-italic text-muted mb-2">JPG ou PNG pas plus de 1 Mo</div>
 
                                 <input class="form-control form-control-solid mb-2 @error('photo') is-invalid @enderror" type="file"  id="image" name="photo" accept="image/*" onchange="previewImage();">
 
@@ -56,25 +56,25 @@
                             <div class="card">
                                 <div class="card-body">
                                     <h3 class="card-title">
-                                        {{ __('User Details') }}
+                                        {{ __('Détails de l\'utilisateur') }}
                                     </h3>
                                     <div class="row row-cards">
                                         <div class="col-md-12">
-                                            <x-input name="name" :value="old('name', $user->name)" required="true"/>
+                                            <x-input name="name" :value="old('name', $user->name)" required="true" label="{{ __('Nom') }}"/>
 
-                                            <x-input name="username" :value="old('username', $user->username)" required="true"/>
+                                            <x-input name="username" :value="old('username', $user->username)" required="true" label="{{ __('Nom d\'utilisateur') }}"/>
 
-                                            <x-input name="email" :value="old('name', $user->email)" label="Email address" required="true"/>
+                                            <x-input name="email" :value="old('name', $user->email)" label="{{ __('Adresse e-mail') }}" required="true"/>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="card-footer text-end">
                                     <x-button.save type="submit">
-                                        {{ __('Save') }}
+                                        {{ __('Enregistrer') }}
                                     </x-button.save>
 
                                     <x-button.back route="{{ route('users.index') }}">
-                                        {{ __('Cancel') }}
+                                        {{ __('Annuler') }}
                                     </x-button.back>
                                 </div>
                             </div>
@@ -89,27 +89,27 @@
                             <div class="card">
                                 <div class="card-body">
                                     <h3 class="card-title">
-                                        {{ __('Change Password') }}
+                                        {{ __('Changer le mot de passe') }}
                                     </h3>
 
                                     <div class="row row-cards">
                                         <div class="col-sm-6 col-md-6">
-                                            <x-input type="password" name="password"/>
+                                            <x-input type="password" name="password" label="{{ __('Nouveau mot de passe') }}"/>
                                         </div>
 
                                         <div class="col-sm-6 col-md-6">
-                                            <x-input type="password" name="password_confirmation" label="Password Confirmation"/>
+                                            <x-input type="password" name="password_confirmation" label="{{ __('Confirmer le mot de passe') }}"/>
                                         </div>
                                     </div>
                                 </div>
 
                                 <div class="card-footer text-end">
                                     <x-button.save type="submit">
-                                        {{ __('Update') }}
+                                        {{ __('Mettre à jour') }}
                                     </x-button.save>
 
                                     <x-button.back route="{{ route('users.index') }}">
-                                        {{ __('Cancel') }}
+                                        {{ __('Annuler') }}
                                     </x-button.back>
                                 </div>
                             </div>

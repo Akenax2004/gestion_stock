@@ -24,12 +24,12 @@
                         <div class="card">
                             <div class="card-body">
                                 <h3 class="card-title">
-                                    {{ __('Profile Image') }}
+                                    {{ __('Image de profil') }}
                                 </h3>
 
                                 <img id="image-preview"
                                      class="img-account-profile mb-2"
-                                     src="{{ asset('assets/img/demo/user-placeholder.svg') }}"
+                                     src="{{ $user->photo ? asset('storage/profile/'.$user->photo) : asset('assets/img/demo/user-placeholder.svg') }}"
                                      alt=""
                                 >
                             </div>
@@ -40,22 +40,22 @@
                         <div class="card">
                             <div class="card-header">
                                 <h3 class="card-title">
-                                    {{ __('User Details') }}
+                                    {{ __('Détails de l\'utilisateur') }}
                                 </h3>
                             </div>
                             <div class="table-responsive">
                                 <table class="table table-bordered card-table table-vcenter text-nowrap datatable">
                                     <tbody>
                                         <tr>
-                                            <td>Name</td>
+                                            <td>{{ __('Nom') }}</td>
                                             <td>{{ $user->name }}</td>
                                         </tr>
                                         <tr>
-                                            <td>Email address</td>
+                                            <td>{{ __('Adresse e-mail') }}</td>
                                             <td>{{ $user->email }}</td>
                                         </tr>
                                         <tr>
-                                            <td>Username</td>
+                                            <td>{{ __('Nom d\'utilisateur') }}</td>
                                             <td>{{ $user->username }}</td>
                                         </tr>
                                     </tbody>
@@ -64,11 +64,11 @@
 
                             <div class="card-footer text-end">
                                 <x-button.edit route="{{ route('users.edit', $user) }}">
-                                    {{ __('Edit') }}
+                                    {{ __('Modifier') }}
                                 </x-button.edit>
 
                                 <x-button.back route="{{ route('users.index') }}">
-                                    {{ __('Cancel') }}
+                                    {{ __('Retour') }}
                                 </x-button.back>
                             </div>
                         </div>

@@ -6,7 +6,7 @@
         <div class="row g-2 align-items-center mb-3">
             <div class="col">
                 <h2 class="page-title">
-                    {{ __('Edit Supplier') }}
+                    {{ __('Modifier le Fournisseur') }}
                 </h2>
             </div>
         </div>
@@ -27,7 +27,7 @@
                         <div class="card">
                             <div class="card-body">
                                 <h3 class="card-title">
-                                    {{ __('Profile Image') }}
+                                    {{ __('Image de Profil') }}
                                 </h3>
 
                                 <img
@@ -36,9 +36,7 @@
                                     id="image-preview"
                                 />
 
-                                <!-- Profile picture help block -->
-                                <div class="small font-italic text-muted mb-2">JPG or PNG no larger than 1 MB</div>
-                                <!-- Profile picture input -->
+                                <div class="small font-italic text-muted mb-2">JPG ou PNG, taille max 1 Mo</div>
                                 <input class="form-control form-control-solid mb-2 @error('photo') is-invalid @enderror" type="file"  id="image" name="photo" accept="image/*" onchange="previewImage();">
                                 @error('photo')
                                 <div class="invalid-feedback">
@@ -54,7 +52,7 @@
                             <div class="card-header">
                                 <div>
                                     <h3 class="card-title">
-                                        {{ __('Supplier Details') }}
+                                        {{ __('Détails du Fournisseur') }}
                                     </h3>
                                 </div>
 
@@ -65,15 +63,15 @@
                             <div class="card-body">
                                 <div class="row row-cards">
                                     <div class="col-md-12">
-                                        <x-input name="name" :value="old('name', $supplier->name)" :required="true"/>
-                                        <x-input name="email" label="Email address" :value="old('email', $supplier->email)" :required="true"/>
-                                        <x-input name="shopname" label="Shop name" :value="old('shopname', $supplier->shopname)" :required="true"/>
-                                        <x-input name="phone" label="Phone number" :value="old('phone', $supplier->phone)" :required="true"/>
+                                        <x-input name="name" label="Nom" :value="old('name', $supplier->name)" :required="true"/>
+                                        <x-input name="email" label="Adresse e-mail" :value="old('email', $supplier->email)" :required="true"/>
+                                        <x-input name="shopname" label="Nom du magasin" :value="old('shopname', $supplier->shopname)" :required="true"/>
+                                        <x-input name="phone" label="Numéro de téléphone" :value="old('phone', $supplier->phone)" :required="true"/>
                                     </div>
 
                                     <div class="col-sm-6 col-md-6">
                                         <label for="type" class="form-label required">
-                                            Type of supplier
+                                            Type de fournisseur
                                         </label>
 
                                         <select class="form-select @error('type') is-invalid @enderror" id="type" name="type">
@@ -93,11 +91,11 @@
 
                                     <div class="col-sm-6 col-md-6">
                                         <label for="bank_name" class="form-label required">
-                                            Bank Name
+                                            Nom de la Banque
                                         </label>
 
                                         <select class="form-select @error('bank_name') is-invalid @enderror" id="bank_name" name="bank_name">
-                                            <option selected="" disabled="">Select a bank:</option>
+                                            <option selected="" disabled="">Sélectionner une banque:</option>
                                             <option value="BRI" @if(old('bank_name', $supplier->bank_name) == 'BRI')selected="selected"@endif>BRI</option>
                                             <option value="BNI" @if(old('bank_name', $supplier->bank_name) == 'BNI')selected="selected"@endif>BNI</option>
                                             <option value="BCA" @if(old('bank_name', $supplier->bank_name) == 'BCA')selected="selected"@endif>BCA</option>
@@ -114,14 +112,14 @@
 
                                     <div class="col-sm-6 col-md-6">
                                         <x-input name="account_holder"
-                                                 label="Account holder"
+                                                 label="Titulaire du compte"
                                                  :value="old('account_holder', $supplier->account_holder)"
                                         />
                                     </div>
 
                                     <div class="col-sm-6 col-md-6">
                                         <x-input name="account_number"
-                                                 label="Account number"
+                                                 label="Numéro de compte"
                                                  :value="old('account_number', $supplier->account_number)"
                                         />
                                     </div>
@@ -129,7 +127,7 @@
                                     <div class="col-md-12">
                                         <div class="mb-3">
                                             <label for="address" class="form-label required">
-                                                {{ __('Address ') }}
+                                                {{ __('Adresse ') }}
                                             </label>
 
                                             <textarea id="address"
@@ -149,11 +147,11 @@
                             </div>
                             <div class="card-footer text-end">
                                 <x-button.save type="submit">
-                                    {{ __('Update') }}
+                                    {{ __('Mettre à jour') }}
                                 </x-button.save>
 
                                 <x-button.back route="{{ route('suppliers.index') }}">
-                                    {{ __('Cancel') }}
+                                    {{ __('Annuler') }}
                                 </x-button.back>
                             </div>
                         </div>

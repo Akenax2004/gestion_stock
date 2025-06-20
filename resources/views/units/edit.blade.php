@@ -7,7 +7,7 @@
             <div class="card-header">
                 <div>
                     <h3 class="card-title">
-                        {{ __('Unit Details') }}
+                        {{ __('Détails de l\'unité') }}
                     </h3>
                 </div>
 
@@ -22,7 +22,7 @@
 
                 <div class="card-body">
                     <x-input
-                        label="{{ __('Unit Name') }}"
+                        label="{{ __('Nom de l\'unité') }}"
                         id="name"
                         name="name"
                         :value="old('name', $unit->name)"
@@ -38,7 +38,7 @@
                     />
 
                     <x-input
-                        label="{{ __('Short Code') }}"
+                        label="{{ __('Code court') }}"
                         id="short_code"
                         name="short_code"
                         :value="old('short_code', $unit->short_code)"
@@ -47,11 +47,11 @@
                 </div>
                 <div class="card-footer text-end">
                     <x-button.save type="submit">
-                        {{ __('Update') }}
+                        {{ __('Mettre à jour') }}
                     </x-button.save>
 
                     <x-button.back route="{{ route('units.index') }}">
-                        {{ __('Cancel') }}
+                        {{ __('Annuler') }}
                     </x-button.back>
                 </div>
             </form>

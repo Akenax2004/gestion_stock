@@ -6,7 +6,7 @@
         <div class="row g-2 align-items-center mb-3">
             <div class="col">
                 <h2 class="page-title">
-                    {{ __('Create User') }}
+                    {{ __('Créer un utilisateur') }}
                 </h2>
             </div>
         </div>
@@ -26,7 +26,7 @@
                         <div class="card">
                             <div class="card-body">
                                 <h3 class="card-title">
-                                    {{ __('User Image') }}
+                                    {{ __('Image de l\'utilisateur') }}
                                 </h3>
 
                                 <img class="img-account-profile mb-2"
@@ -36,7 +36,7 @@
                                 >
 
                                 <div class="small font-italic text-muted mb-2">
-                                    JPG or PNG no larger than 1 MB
+                                    JPG ou PNG pas plus de 1 Mo
                                 </div>
 
                                 <input type="file"
@@ -60,37 +60,37 @@
                         <div class="card">
                             <div class="card-body">
                                 <h3 class="card-title">
-                                    {{ __('User Details') }}
+                                    {{ __('Détails de l\'utilisateur') }}
                                 </h3>
 
                                 <div class="row row-cards">
                                     <div class="col-md-12">
 
-                                        <x-input name="name" :value="old('name')" required="true"/>
+                                        <x-input name="name" :value="old('name')" required="true" label="{{ __('Nom') }}"/>
 
-                                        <x-input name="email" :value="old('email')" required="true"/>
+                                        <x-input name="email" :value="old('email')" required="true" label="{{ __('Adresse e-mail') }}"/>
 
-                                        <x-input name="username" :value="old('username')" required="true"/>
+                                        <x-input name="username" :value="old('username')" required="true" label="{{ __('Nom d\'utilisateur') }}"/>
 
                                     </div>
 
                                     <div class="col-sm-6 col-md-6">
-                                        <x-input type="password" name="password"/>
+                                        <x-input type="password" name="password" label="{{ __('Mot de passe') }}"/>
                                     </div>
 
-                                    <div class="col-sm-6 col-md-6">
-                                        <x-input type="password" name="password_confirmation" label="Password Confirmation"/>
+                                    <div class="sm-6 col-md-6">
+                                        <x-input type="password" name="password_confirmation" label="{{ __('Confirmation du mot de passe') }}"/>
                                     </div>
                                 </div>
                             </div>
 
                             <div class="card-footer text-end">
                                 <x-button.save type="submit">
-                                    {{ __('Save') }}
+                                    {{ __('Enregistrer') }}
                                 </x-button.save>
 
                                 <x-button.back route="{{ route('users.index') }}">
-                                    {{ __('Cancel') }}
+                                    {{ __('Annuler') }}
                                 </x-button.back>
                             </div>
                         </div>
