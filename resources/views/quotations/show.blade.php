@@ -185,7 +185,7 @@
                         {{-- complete quotation button --}}
                         @if ($quotation->status->value == 0)
                             <div class="col-4 float-right my-4">
-                                <form action="{{ route('quotations.update', $quotation->uuid) }}" method="POST">
+                            <form action="{{ route('quotations.update', $quotation) }}" method="POST">
                                     @csrf
                                     <button type="submit" class="btn btn-success">
                                         <i class="bi bi-check-circle"></i>

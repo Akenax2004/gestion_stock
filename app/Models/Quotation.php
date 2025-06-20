@@ -100,4 +100,9 @@ class Quotation extends Model
     {
         return $this->hasMany(Company::class);
     }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class); // Assurez-vous que User::class pointe vers votre modèle User
+    }
 }

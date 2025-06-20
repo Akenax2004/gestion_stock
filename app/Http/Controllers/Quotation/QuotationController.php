@@ -171,7 +171,7 @@ class QuotationController extends Controller
         }
 
         // Charger les relations nécessaires
-        $quotation->loadMissing(['customer', 'details']);
+        $quotation->loadMissing(['customer', 'quotationDetails', 'user']);
 
         return view('quotations.show', [
             'quotation' => $quotation,
