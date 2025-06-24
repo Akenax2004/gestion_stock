@@ -10,12 +10,20 @@ class LicencePlan extends Model
     use HasFactory;
 
     protected $fillable = [
-        'name', 'plan_type', 'duration_type', 'duration_days', 'price_xof', 'features', 'max_companies',
+        'name',
+        'plan_type',
+        'duration_type',
+        'duration_days',
+        'price_xof',
+        'features',
+        'max_companies',
+        'max_users_per_company', // Ajouté
     ];
 
     protected $casts = [
         'features' => 'array', // Pour que Laravel gère le JSON automatiquement
         'max_companies' => 'integer',
+        'max_users_per_company' => 'integer', // Ajouté
     ];
 
     // Définir des constantes pour les types de plan si vous le souhaitez

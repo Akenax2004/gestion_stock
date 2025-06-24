@@ -4,25 +4,36 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\LicencePlan;
-use App\Models\CompanyLicence; // Utilise CompanyLicence (qui pointe vers user_licences)
+use App\Models\UserLicence; // Utilise le modèle UserLicence, c'est le bon nom maintenant
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use App\Providers\RouteServiceProvider; // Pour la redirection vers la page de gestion des entreprises
 
 class LicenceController extends Controller
 {
-    // Affiche la page des plans de licence
-    public function showLicencePlans()
+    /**
+     * Affiche la page des plans de licence
+     */
+    public function chooseLicense() // C'est cette méthode qui doit exister
     {
-        // Récupère tous les plans, y compris le plan TRIAL maintenant
-        $licencePlans = LicencePlan::all(); // Ou filter si vous voulez exclure certains plans de l'affichage
+        // Seuls les admin_principal devraient voir cette page
+        if (!Auth::user()->isAdminPrincipal()) {
+            // Rediriger ou afficher une erreur si un non-admin principal tente d'accéder
+            return redirect()->route('dashboard')->with('error', 'Vous n\'êtes pas autorisé à gérer les licences.');
+        }
 
-        $currentUserLicence = Auth::user()->licence; // Récupère la licence de l'utilisateur connecté
+        $licencePlans = LicencePlan::all(); // Récupère tous les plans disponibles
 
-        return view('licences.show', compact('licencePlans', 'currentUserLicence'));
+        // Récupère la licence active de l'utilisateur connecté (admin_principal)
+        $currentUserLicence = Auth::user()->licence;
+
+        return view('licences.choose', compact('licencePlans', 'currentUserLicence')); // Utilise 'licences.choose' pour la vue
     }
 
-    // Gère la soumission du formulaire d'achat (y compris l'activation de l'essai gratuit)
+    /**
+     * Gère la soumission du formulaire d'achat (y compris l'activation de l'essai gratuit)
+     */
     public function processPurchase(Request $request)
     {
         $request->validate([
@@ -33,13 +44,18 @@ class LicenceController extends Controller
         $user = Auth::user();
         $userId = $user->id;
 
+        // Seuls les admin_principal peuvent souscrire des licences
+        if (!$user->isAdminPrincipal()) {
+            return redirect()->back()->withErrors('Seuls les administrateurs principaux peuvent souscrire à une licence.');
+        }
+
         // Récupère la licence existante de l'utilisateur ou en crée une nouvelle instance
-        $licence = CompanyLicence::firstOrNew(['user_id' => $userId]);
+        $licence = UserLicence::firstOrNew(['user_id' => $userId]);
 
         // Vérifie si le plan choisi est un essai gratuit
         if ($plan->plan_type === LicencePlan::PLAN_TRIAL) {
             // Logique pour l'essai gratuit
-            if ($licence->exists && ($licence->status === CompanyLicence::STATUS_TRIAL || $licence->status === CompanyLicence::STATUS_ACTIVE)) {
+            if ($licence->exists && ($licence->status === UserLicence::STATUS_TRIAL || $licence->status === UserLicence::STATUS_ACTIVE)) {
                 // Si l'utilisateur a déjà un essai ou une licence active, ne pas permettre un nouvel essai gratuit
                 Log::warning('Utilisateur ' . $userId . ' a tenté de souscrire à un nouvel essai gratuit alors qu\'il a déjà une licence valide.');
                 return redirect()->back()->withErrors('Vous avez déjà une licence active ou vous avez déjà utilisé votre essai gratuit.');
@@ -48,12 +64,13 @@ class LicenceController extends Controller
             $licence->licence_plan_id = $plan->id;
             $licence->start_date = Carbon::today();
             $licence->end_date = Carbon::today()->addDays($plan->duration_days);
-            $licence->status = CompanyLicence::STATUS_TRIAL;
+            $licence->status = UserLicence::STATUS_TRIAL;
             $licence->transaction_id = null; // Pas de transaction ID pour l'essai gratuit
             $licence->save();
 
             Log::info('Licence d\'essai gratuite activée pour l\'utilisateur: ' . $userId);
-            return redirect()->route('dashboard')->with('success', 'Votre essai gratuit de ' . $plan->duration_days . ' jours a été activé !');
+            // Redirection après succès : vers la page de gestion des entreprises de l'admin principal
+            return redirect()->route('manage.companies.index')->with('success', 'Votre essai gratuit de ' . $plan->duration_days . ' jours a été activé !');
 
         } else {
             // Logique pour les plans payants
@@ -67,7 +84,7 @@ class LicenceController extends Controller
             //     $licence->licence_plan_id = $plan->id;
             //     $licence->start_date = Carbon::today(); // Date de début temporaire ou à définir après paiement
             //     $licence->end_date = Carbon::today()->addDays($plan->duration_days); // Date de fin temporaire
-            //     $licence->status = CompanyLicence::STATUS_PENDING;
+            //     $licence->status = UserLicence::STATUS_PENDING;
             //     $licence->transaction_id = $transactionDetails['transaction_id']; // Utilisez le vrai ID de transaction
             //     $licence->save();
             //
@@ -82,31 +99,34 @@ class LicenceController extends Controller
             $licence->licence_plan_id = $plan->id;
             $licence->start_date = Carbon::today();
             $licence->end_date = Carbon::today()->addDays($plan->duration_days);
-            $licence->status = CompanyLicence::STATUS_ACTIVE; // Activez directement pour les tests
+            $licence->status = UserLicence::STATUS_ACTIVE; // Activez directement pour les tests
             $licence->transaction_id = 'FAKE_TXN_' . uniqid(); // Placeholder
             $licence->save();
 
             Log::info('Licence payante activée (mode test) pour l\'utilisateur: ' . $userId . ' - Plan: ' . $plan->name);
-            return redirect()->route('dashboard')->with('success', 'Votre licence "' . $plan->name . '" a été activée avec succès !');
+            // Redirection après succès : vers la page de gestion des entreprises de l'admin principal
+            return redirect()->route('manage.companies.index')->with('success', 'Votre licence "' . $plan->name . '" a été activée avec succès !');
         }
     }
 
-    // Gère les webhooks de la passerelle de paiement (pour les plans payants)
+    /**
+     * Gère les webhooks de la passerelle de paiement (pour les plans payants)
+     */
     public function handleWebhook(Request $request, string $provider)
     {
-        // ... (Logique de webhook existante, en s'assurant qu'elle met à jour CompanyLicence::class)
+        // ... (Logique de webhook existante, en s'assurant qu'elle met à jour UserLicence::class)
 
         // Exemple simplifié:
         $payload = $request->all();
         $transactionId = $payload['transaction_id'] ?? null; // À adapter selon le prestataire
 
         if ($transactionId) {
-            $licence = CompanyLicence::where('transaction_id', $transactionId)->first();
+            $licence = UserLicence::where('transaction_id', $transactionId)->first();
             if ($licence) {
                 // Vérifications de sécurité: montant, statut, etc.
                 $licence->start_date = Carbon::today();
                 $licence->end_date = Carbon::today()->addDays($licence->licencePlan->duration_days);
-                $licence->status = CompanyLicence::STATUS_ACTIVE;
+                $licence->status = UserLicence::STATUS_ACTIVE;
                 $licence->save();
                 Log::info('Licence activée via webhook pour user_id: ' . $licence->user_id . ' (Transaction: ' . $transactionId . ')');
                 return response()->json(['message' => 'Webhook received and processed'], 200);

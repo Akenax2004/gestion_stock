@@ -36,8 +36,8 @@ class Kernel extends HttpKernel
             \Illuminate\View\Middleware\ShareErrorsFromSession::class,
             \App\Http\Middleware\VerifyCsrfToken::class,
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
-            // RETIREZ App\Http\Middleware\CheckCompanyLicence::class de ce groupe global 'web'
-            // Il sera appliqué plus spécifiquement dans web.php
+            // ASSUREZ-VOUS QUE App\Http\Middleware\CheckCompanyLicence::class N'EST PAS ICI
+            // Si elle était présente, elle doit être retirée.
         ],
 
         'api' => [
@@ -65,10 +65,9 @@ class Kernel extends HttpKernel
         'signed' => \App\Http\Middleware\ValidateSignature::class,
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
-        // Renommez ou assurez-vous que c'est le bon nom pour votre middleware de sélection d'entreprise
+        // Alias pour votre middleware de sélection d'entreprise (si tu l'as déjà)
         'company.selected' => \App\Http\Middleware\EnsureCompanySelected::class,
-        // AJOUTEZ CETTE LIGNE - C'est l'alias pour votre middleware de licence
-        'check.licence' => \App\Http\Middleware\RedirectIfLicenceExpired::class, // Assurez-vous que ce nom de classe est correct
+        // NOTRE NOUVEL ALIAS POUR LE MIDDLEWARE DE LICENCE
+        'has.license' => \App\Http\Middleware\EnsureUserHasActiveLicense::class, // C'est la ligne à ajouter/modifier
     ];
 }
-

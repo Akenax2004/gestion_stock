@@ -19,7 +19,10 @@ use App\Http\Controllers\Dashboards\DashboardController;
 use App\Http\Controllers\Product\ProductExportController;
 use App\Http\Controllers\Product\ProductImportController;
 use App\Http\Controllers\CompanyController;
-use App\Http\Controllers\LicenceController; // Importez le LicenceController
+use App\Http\Controllers\LicenceController;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Session;
+use App\Models\Company;
 
 /*
 |--------------------------------------------------------------------------
@@ -40,96 +43,170 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::middleware(['auth'])->group(function () {
-    // Routes qui NE NÉCESSITENT PAS une entreprise sélectionnée (gestion des entreprises elles-mêmes)
-    // Route::resource('companies', CompanyController::class); // Cette ligne peut être problématique car elle crée aussi show/edit/update/destroy
-    // Mieux vaut définir les routes de manière plus explicite pour éviter les conflits si vous avez deux groupes.
-    Route::get('/companies', [CompanyController::class, 'index'])->name('companies.index');
-    Route::get('/companies/create', [CompanyController::class, 'create'])->name('companies.create');
-    Route::post('/companies', [CompanyController::class, 'store'])->name('companies.store');
+require __DIR__.'/auth.php';
 
+Route::middleware(['auth'])->group(function () {
+    // Routes pour la gestion des licences (accessibles par l'admin_principal)
+    Route::get('/choose-license', [LicenceController::class, 'chooseLicense'])->name('choose-license');
+    Route::post('/process-purchase', [LicenceController::class, 'processPurchase'])->name('process-purchase');
+
+    // Les routes de gestion des entreprises (index, create, store)
+    // Ces routes sont destinées à l'admin_principal et gèrent la création/liste des entreprises de l'utilisateur.
+    Route::get('/companies', [CompanyController::class, 'index'])->name('manage.companies.index');
+    Route::get('/companies/create', [CompanyController::class, 'create'])->name('manage.companies.create');
+    Route::post('/companies', [CompanyController::class, 'store'])->name('manage.companies.store');
+
+    // Route pour sélectionner une entreprise - DOIT ÊTRE ICI pour fonctionner avant 'company.selected'
     Route::get('/companies/{company}/select', [CompanyController::class, 'select'])->name('companies.select');
 
-    // Routes pour la gestion des licences
-    // Ces routes doivent être accessibles même si la licence est expirée pour permettre le paiement
-    Route::get('/licences', [LicenceController::class, 'showLicencePlans'])->name('licences.show');
-    Route::post('/licences/purchase', [LicenceController::class, 'processPurchase'])->name('licences.purchase');
-    // Route pour le webhook de paiement (doit être accessible sans authentification si c'est un webhook externe)
-    Route::post('/licences/webhook/{provider}', [LicenceController::class, 'handleWebhook'])->name('licences.webhook');
+    // Le dashboard par défaut de Laravel (après connexion)
+    // Agit comme un point d'entrée qui redirige selon le statut de l'utilisateur
+    Route::get('/dashboard', function () {
+        $user = Auth::user();
+        if ($user->isAdminPrincipal()) {
+            // Si admin principal n'a pas de licence, rediriger vers la page de choix de licence
+            if (!$user->licence || !$user->licence->isActive()) {
+                return redirect()->route('choose-license');
+            }
+            // Si admin principal a une licence active, mais pas d'entreprise sélectionnée en session
+            // ou si l'entreprise en session n'est plus valide/n'appartient pas à l'utilisateur
+            if (!Session::has('active_company_id') || !Session::get('active_company_id') ||
+                !Company::where('id', Session::get('active_company_id'))->where('user_id', $user->id)->exists()) {
+                return redirect()->route('manage.companies.index'); // Redirige vers la liste des entreprises
+            }
+            // Si tout est bon (licence active ET entreprise sélectionnée),
+            // rediriger vers le VRAI tableau de bord de l'entreprise
+            return redirect()->route('company.dashboard');
+        }
+        // Pour les utilisateurs secondaires, ils seront redirigés par le middleware 'company.selected'
+        // vers leur dashboard d'entreprise (via la route 'company.dashboard')
+        return redirect()->route('company.dashboard');
+    })->name('dashboard');
 
-    // Toutes les routes ci-dessous nécessitent une entreprise active ET une licence valide
-    Route::middleware(['company.selected', 'check.licence'])->group(function () {
-        Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    // Routes de profil utilisateur (accessibles par tous les utilisateurs authentifiés)
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::get('/profile/settings', [ProfileController::class, 'settings'])->name('profile.settings');
 
-        // CRUD pour les entreprises (si vous les protégez par la licence)
-        Route::get('/companies/{company}', [CompanyController::class, 'show'])->name('companies.show');
-        Route::get('/companies/{company}/edit', [CompanyController::class, 'edit'])->name('companies.edit');
-        Route::put('/companies/{company}', [CompanyController::class, 'update'])->name('companies.update');
-        Route::delete('/companies/{company}', [CompanyController::class, 'destroy'])->name('companies.destroy');
 
-        // User Management
-        Route::resource('/users', UserController::class); //->except(['show']);
-        Route::put('/user/change-password/{username}', [UserController::class, 'updatePassword'])->name('users.updatePassword');
+    // ---------- DÉBUT DES ROUTES NÉCESSITANT UNE LICENCE ACTIVE ET UNE ENTREPRISE SÉLECTIONNÉE ----------
+    // Ces routes sont protégées par le middleware 'has.license' (vérif licence)
+    // ET par le middleware 'company.selected' (vérif entreprise sélectionnée et attache l'objet Company à la requête)
+    Route::middleware(['has.license', 'company.selected'])->group(function () {
 
-        Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-        Route::get('/profile/settings', [ProfileController::class, 'settings'])->name('profile.settings');
-        Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-        Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+        // Le VRAI tableau de bord de l'entreprise (où DashboardController@index est appelé)
+        Route::get('/company-dashboard', [DashboardController::class, 'index'])->name('company.dashboard');
 
-        Route::resource('/quotations', QuotationController::class);
-        Route::resource('/customers', CustomerController::class);
-        Route::resource('/suppliers', SupplierController::class);
-        Route::resource('/categories', CategoryController::class);
-        Route::resource('/units', UnitController::class);
 
-        // Route Products
-        Route::get('/products/import', [ProductImportController::class, 'create'])->name('products.import.view');
-        Route::post('/products/import', [ProductImportController::class, 'store'])->name('products.import.store');
-        Route::get('/products/export', [ProductExportController::class, 'create'])->name('products.export.store');
-        Route::resource('/products', ProductController::class);
+        // CRUD pour les entreprises (show, edit, update, delete)
+        // Seuls l'admin principal devrait avoir accès à ces routes
+        Route::middleware(['can:manage-companies'])->group(function () {
+            Route::get('/companies/{company}', [CompanyController::class, 'show'])->name('manage.companies.show');
+            Route::get('/companies/{company}/edit', [CompanyController::class, 'edit'])->name('manage.companies.edit');
+            Route::put('/companies/{company}', [CompanyController::class, 'update'])->name('manage.companies.update');
+            Route::delete('/companies/{company}', [CompanyController::class, 'destroy'])->name('manage.companies.destroy');
+        });
 
-        // Route Orders
-        Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
-        Route::get('/orders/pending', OrderPendingController::class)->name('orders.pending');
-        Route::get('/orders/complete', OrderCompleteController::class)->name('orders.complete');
 
-        Route::get('/orders/create', [OrderController::class, 'create'])->name('orders.create');
-        Route::post('/orders/store', [OrderController::class, 'store'])->name('orders.store');
+        // User Management (Protégé par une permission)
+        // Seuls l'admin principal peut gérer les utilisateurs de l'entreprise
+        Route::middleware(['can:manage-users-per-company'])->group(function () {
+            Route::resource('/users', UserController::class); // Le UserController gère déjà la logique admin_principal
+            Route::put('/user/change-password/{username}', [UserController::class, 'updatePassword'])->name('users.updatePassword');
+        });
 
-        Route::post('/invoice/create', [InvoiceController::class, 'create'])->name('invoice.create');
 
-        // SHOW ORDER
-        Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
-        Route::put('/orders/update/{order}', [OrderController::class, 'update'])->name('orders.update');
+        // Quotidien
+        Route::resource('/quotations', QuotationController::class)->middleware(['can:manage-quotations']);
+        // Clients et Fournisseurs sous 'Pages' dans votre navbar
+        Route::resource('/customers', CustomerController::class)->middleware(['can:manage-customers']);
+        Route::resource('/suppliers', SupplierController::class)->middleware(['can:manage-suppliers']);
 
-        // DUES
-        Route::get('/due/orders/', [DueOrderController::class, 'index'])->name('due.index');
-        Route::get('/due/order/view/{order}', [DueOrderController::class, 'show'])->name('due.show');
-        Route::get('/due/order/edit/{order}', [DueOrderController::class, 'edit'])->name('due.edit');
-        Route::put('/due/order/update/{order}', [DueOrderController::class, 'update'])->name('due.update');
 
-        // TODO: Remove from OrderController (Cette ligne peut être retirée si vous avez déjà déplacé la logique)
-        Route::get('/orders/details/{order_id}/download', [OrderController::class, 'downloadInvoice'])->name('order.downloadInvoice');
+        // Stock & Produits
+        // Permissions pour créer les produits (formulaire et soumission)
+        Route::middleware(['can:create-product'])->group(function () {
+            Route::get('/products/create', [ProductController::class, 'create'])->name('products.create'); // La route manquante !
+            Route::post('/products', [ProductController::class, 'store'])->name('products.store');
+        });
+        // Permission pour voir les produits (index et show)
+        Route::middleware(['can:view-products'])->group(function () {
+            Route::get('/products', [ProductController::class, 'index'])->name('products.index');
+            Route::get('/products/{product}', [ProductController::class, 'show'])->name('products.show');
+        });
+        // Permissions pour modifier les produits
+        Route::middleware(['can:edit-product'])->group(function () {
+            Route::get('/products/{product}/edit', [ProductController::class, 'edit'])->name('products.edit');
+            Route::put('/products/{product}', [ProductController::class, 'update'])->name('products.update');
+        });
+        // Permissions pour supprimer les produits
+        Route::middleware(['can:delete-product'])->group(function () {
+            Route::delete('/products/{product}', [ProductController::class, 'destroy'])->name('products.delete');
+        });
+        // Permissions pour l'import/export de produits (gestion du stock)
+        Route::middleware(['can:manage-stock-in'])->group(function () {
+             Route::get('/products/import', [ProductImportController::class, 'create'])->name('products.import.view');
+             Route::post('/products/import', [ProductImportController::class, 'store'])->name('products.import.store');
+        });
+        Route::middleware(['can:manage-stock-out'])->group(function () {
+             Route::get('/products/export', [ProductExportController::class, 'create'])->name('products.export.store');
+        });
 
-        // Route Purchases
-        // CORRECTION ICI : Le nom de la route doit être 'purchases.approvedPurchases'
-        Route::get('/purchases/approved', [PurchaseController::class, 'approvedPurchases'])->name('purchases.approvedPurchases');
-        Route::get('/purchases/report', [PurchaseController::class, 'dailyPurchaseReport'])->name('purchases.dailyPurchaseReport');
-        Route::get('/purchases/report/export', [PurchaseController::class, 'getPurchaseReport'])->name('purchases.getPurchaseReport');
-        Route::post('/purchases/report/export', [PurchaseController::class, 'exportPurchaseReport'])->name('purchases.exportPurchaseReport');
+        // Commandes (Ventes)
+        // Permission pour créer des commandes
+        Route::middleware(['can:create-order'])->group(function () {
+            Route::get('/orders/create', [OrderController::class, 'create'])->name('orders.create');
+            Route::post('/orders/store', [OrderController::class, 'store'])->name('orders.store');
+            Route::post('/invoice/create', [InvoiceController::class, 'create'])->name('invoice.create'); // Création de facture liée à la commande
+        });
+        // Permissions pour voir les commandes
+        Route::middleware(['can:view-orders'])->group(function () {
+            Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
+            Route::get('/orders/pending', OrderPendingController::class)->name('orders.pending');
+            Route::get('/orders/complete', OrderCompleteController::class)->name('orders.complete');
+            Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
+            Route::get('/due/orders/', [DueOrderController::class, 'index'])->name('due.index');
+            Route::get('/due/order/view/{order}', [DueOrderController::class, 'show'])->name('due.show');
+            Route::get('/orders/details/{order_id}/download', [OrderController::class, 'downloadInvoice'])->name('order.downloadInvoice');
+        });
+        // Permissions pour modifier les commandes
+        Route::middleware(['can:edit-order'])->group(function () {
+            Route::put('/orders/update/{order}', [OrderController::class, 'update'])->name('orders.update');
+            Route::get('/due/order/edit/{order}', [DueOrderController::class, 'edit'])->name('due.edit');
+            Route::put('/due/order/update/{order}', [DueOrderController::class, 'update'])->name('due.update');
+        });
 
-        Route::get('/purchases', [PurchaseController::class, 'index'])->name('purchases.index');
-        Route::get('/purchases/create', [PurchaseController::class, 'create'])->name('purchases.create');
-        Route::post('/purchases', [PurchaseController::class, 'store'])->name('purchases.store');
+        // Achats
+        Route::middleware(['can:manage-purchases'])->group(function () {
+            Route::get('/purchases/approved', [PurchaseController::class, 'approvedPurchases'])->name('purchases.approvedPurchases');
+            Route::get('/purchases/report', [PurchaseController::class, 'dailyPurchaseReport'])->name('purchases.dailyPurchaseReport');
+            Route::get('/purchases/report/export', [PurchaseController::class, 'getPurchaseReport'])->name('purchases.getPurchaseReport');
+            Route::post('/purchases/report/export', [PurchaseController::class, 'exportPurchaseReport'])->name('purchases.exportPurchaseReport');
+            Route::get('/purchases', [PurchaseController::class, 'index'])->name('purchases.index');
+            Route::get('/purchases/create', [PurchaseController::class, 'create'])->name('purchases.create');
+            Route::post('/purchases', [PurchaseController::class, 'store'])->name('purchases.store');
+            Route::get('/purchases/{purchase}', [PurchaseController::class, 'show'])->name('purchases.show');
+            Route::get('/purchases/{purchase}/edit', [PurchaseController::class, 'edit'])->name('purchases.edit');
+            Route::put('/purchases/{purchase}/edit', [PurchaseController::class, 'update'])->name('purchases.update');
+            Route::delete('/purchases/{purchase}', [PurchaseController::class, 'destroy'])->name('purchases.delete');
+        });
 
-        Route::get('/purchases/{purchase}', [PurchaseController::class, 'show'])->name('purchases.show');
-        Route::get('/purchases/{purchase}/edit', [PurchaseController::class, 'edit'])->name('purchases.edit');
-        Route::put('/purchases/{purchase}/edit', [PurchaseController::class, 'update'])->name('purchases.update');
-        Route::delete('/purchases/{purchase}', [PurchaseController::class, 'destroy'])->name('purchases.delete');
-    }); // FIN DU GROUPE MIDDLEWARE 'company.selected' et 'check.licence'
+
+        // Paramètres (Catégories et Unités)
+        Route::middleware(['can:manage-categories'])->group(function () {
+            Route::resource('/categories', CategoryController::class);
+        });
+        Route::middleware(['can:manage-units'])->group(function () {
+            Route::resource('/units', UnitController::class);
+        });
+
+    });
 });
 
-require __DIR__.'/auth.php';
+
+// Route pour le webhook de paiement (peut être accessible sans authentification si c'est un webhook externe)
+Route::post('/licences/webhook/{provider}', [LicenceController::class, 'handleWebhook'])->name('licences.webhook');
 
 Route::get('test/', function (){
     return view('orders.create');

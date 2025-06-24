@@ -1,271 +1,97 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="utf-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
-    <meta http-equiv="X-UA-Compatible" content="ie=edge"/>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mes Entreprises</title>
-    <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}" />
-
-    <!-- CSS files -->
-    <link href="{{ asset('dist/css/tabler.min.css') }}" rel="stylesheet"/>
-    <style>
-        @import url('https://rsms.me/inter/inter.css');
-        :root {
-            --tblr-font-sans-serif: 'Inter Var', -apple-system, BlinkMacSystemFont, San Francisco, Segoe UI, Roboto, Helvetica Neue, sans-serif;
-        }
-        body {
-            font-feature-settings: "cv03", "cv04", "cv11";
-        }
-
-        /* Styles Tailwind CSS de base pour le conteneur et les alertes */
-        .container {
-            width: 100%;
-            margin-right: auto;
-            margin-left: auto;
-            padding-right: 1rem;
-            padding-left: 1rem;
-        }
-        @media (min-width: 640px) {
-            .container { max-width: 640px; }
-        }
-        @media (min-width: 768px) {
-            .container { max-width: 768px; }
-        }
-        @media (min-width: 1024px) {
-            .container { max-width: 1024px; }
-        }
-        @media (min-width: 1280px) {
-            .container { max-width: 1280px; }
-        }
-        .mx-auto { margin-left: auto; margin-right: auto; }
-        .px-4 { padding-left: 1rem; padding-right: 1rem; }
-        .py-8 { padding-top: 2rem; padding-bottom: 2rem; }
-        .mb-6 { margin-bottom: 1.5rem; }
-        .mb-4 { margin-bottom: 1rem; }
-        .mt-3 { margin-top: 0.75rem; }
-
-        /* Flexbox */
-        .flex { display: flex; }
-        .justify-between { justify-content: space-between; }
-        .items-center { align-items: center; }
-
-        /* Typography */
-        .text-3xl { font-size: 1.875rem; line-height: 2.25rem; }
-        .font-bold { font-weight: 700; }
-        .text-gray-800 { color: #2d3748; }
-        .text-white { color: #fff; }
-        .text-left { text-align: left; }
-        .text-xs { font-size: 0.75rem; line-height: 1rem; }
-        .font-semibold { font-weight: 600; }
-        .text-gray-600 { color: #4a5568; }
-        .uppercase { text-transform: uppercase; }
-        .tracking-wider { letter-spacing: 0.05em; }
-        .text-sm { font-size: 0.875rem; line-height: 1.25rem; }
-        .text-gray-900 { color: #1a202c; }
-        .whitespace-no-wrap { white-space: nowrap; }
-        .leading-tight { line-height: 1.25; }
-        .text-green-900 { color: #1a4d2e; }
-        .text-red-900 { color: #660000; }
-        .text-yellow-700 { color: #975A16; }
-        .text-indigo-600 { color: #4338ca; }
-        .hover\:text-indigo-900:hover { color: #282181; }
-        .text-yellow-600 { color: #d69e2e; }
-        .hover\:text-yellow-900:hover { color: #8B5F22; }
-        .text-red-600 { color: #dc2626; }
-        .hover\:text-red-900:hover { color: #991b1b; }
-        .text-xs { font-size: 0.75rem; line-height: 1rem; } /* Répété, mais assure sa présence */
-
-        /* Sizing and Spacing */
-        .w-10 { width: 2.5rem; }
-        .h-10 { height: 2.5rem; }
-        .py-2 { padding-top: 0.5rem; padding-bottom: 0.5rem; }
-        .px-4 { padding-left: 1rem; padding-right: 1rem; }
-        .px-5 { padding-left: 1.25rem; padding-right: 1.25rem; }
-        .py-3 { padding-top: 0.75rem; padding-bottom: 0.75rem; }
-        .py-5 { padding-top: 1.25rem; padding-bottom: 1.25rem; }
-        .mr-3 { margin-right: 0.75rem; }
-
-        /* Borders and Shadows */
-        .rounded-lg { border-radius: 0.5rem; }
-        .rounded-full { border-radius: 9999px; }
-        .shadow-md { box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); }
-        .border { border-width: 1px; }
-        .border-green-400 { border-color: #48bb78; }
-        .border-red-400 { border-color: #ef4444; }
-        .border-yellow-400 { border-color: #F6E05E; }
-        .border-b-2 { border-bottom-width: 2px; }
-        .border-gray-200 { border-color: #edf2f7; }
-        .border-b { border-bottom-width: 1px; }
-
-        /* Backgrounds */
-        .bg-blue-600 { background-color: #2563eb; }
-        .hover\:bg-blue-700:hover { background-color: #1d4ed8; }
-        .bg-green-100 { background-color: #edfdf1; }
-        .bg-red-100 { background-color: #fef2f2; }
-        .bg-yellow-100 { background-color: #FEF3C7; }
-        .bg-white { background-color: #fff; }
-        .bg-gray-100 { background-color: #f7fafc; }
-        .bg-gray-300 { background-color: #d1d5db; }
-        .bg-green-200 { background-color: #a7f3d0; }
-        .bg-red-200 { background-color: #fecaca; }
-
-        /* Transitions */
-        .transition { transition-property: background-color, border-color, color, fill, stroke, opacity, box-shadow, transform; }
-        .duration-300 { transition-duration: 0.3s; }
-
-        /* Other */
-        .rounded { border-radius: 0.25rem; }
-        .relative { position: relative; }
-        .block { display: block; }
-        .sm\:inline { display: inline; } /* Pas de @media sm pour l'exemple, mais garde la classe */
-        .overflow-hidden { overflow: hidden; }
-        .min-w-full { min-width: 100%; }
-        .object-cover { object-fit: cover; }
-        .flex { display: flex; }
-        .items-center { align-items: center; }
-        .justify-center { justify-content: center; }
-        .inline-block { display: inline-block; }
-        .absolute { position: absolute; }
-        .inset-0 { top: 0; right: 0; bottom: 0; left: 0; }
-        .opacity-50 { opacity: 0.5; }
-        .list-disc { list-style-type: disc; }
-        .list-inside { list-style-position: inside; }
-
-        /* Styles spécifiques pour le bouton de confirmation de suppression */
-        form.inline-block button[type="submit"] {
-            background: none;
-            border: none;
-            padding: 0;
-            margin: 0;
-            font: inherit;
-            cursor: pointer;
-        }
-    </style>
-
-    <!-- Custom CSS for specific page. -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 </head>
-<body>
-    <div class="container mx-auto px-4 py-8">
-        <div class="flex justify-between items-center mb-6">
-            <h1 class="text-3xl font-bold text-gray-800">Mes Entreprises</h1>
-            <a href="{{ route('companies.create') }}" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-300">
-                Créer une nouvelle entreprise
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+    <div class="bg-white p-8 rounded-lg shadow-md w-full max-w-4xl">
+        <h1 class="text-3xl font-bold text-center text-gray-800 mb-6">Mes Entreprises</h1>
+
+        @if (session('success'))
+            <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4" role="alert">
+                <span class="block sm:inline">{{ session('success') }}</span>
+            </div>
+        @endif
+
+        @if (session('error'))
+            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
+                <span class="block sm:inline">{{ session('error') }}</span>
+            </div>
+        @endif
+
+        <div class="mb-6 flex justify-between items-center">
+            <a href="{{ route('manage.companies.create') }}" class="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-md">
+                Créer une Nouvelle Entreprise
+            </a>
+            <a href="{{ route('choose-license') }}" class="bg-yellow-500 hover:bg-yellow-600 text-white py-2 px-4 rounded-md">
+                Gérer ma Licence
             </a>
         </div>
 
-        @php
-            // Simulation des données de session/erreurs pour la démonstration HTML statique.
-            // Dans un vrai Blade, ces variables seraient définies par Laravel.
-            $sessionSuccess = session('success') ?? null;
-            $errorsBag = $errors ?? collect();
-        @endphp
 
-        @if ($sessionSuccess)
-            <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4" role="alert">
-                <span class="block sm:inline">{{ $sessionSuccess }}</span>
-            </div>
-        @endif
-        @if ($errorsBag->any())
-            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
-                <ul class="list-disc list-inside">
-                    @foreach ($errorsBag->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
-            </div>
-        @endif
-
-        @if(isset($companies) && $companies->isEmpty())
-            <div class="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded relative" role="alert">
-                <span class="block sm:inline">Vous n'avez pas encore d'entreprise enregistrée.</span>
-            </div>
-        @elseif(isset($companies) && $companies->isNotEmpty())
-            <div class="bg-white shadow-md rounded-lg overflow-hidden">
-                <table class="min-w-full leading-normal">
+        @if ($companies->isEmpty())
+            <p class="text-center text-gray-600">Vous n'avez pas encore créé d'entreprises.</p>
+        @else
+            <div class="overflow-x-auto">
+                <table class="min-w-full bg-white border border-gray-200 rounded-lg">
                     <thead>
-                        <tr>
-                            <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                Logo
-                            </th>
-                            <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                Nom
-                            </th>
-                            <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                Email
-                            </th>
-                            <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                Téléphone
-                            </th>
-                            <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                Statut
-                            </th>
-                            <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                Actions
-                            </th>
+                        <tr class="bg-gray-100 text-gray-600 uppercase text-sm leading-normal">
+                            <th class="py-3 px-6 text-left">Nom</th>
+                            <th class="py-3 px-6 text-left">Email</th>
+                            <th class="py-3 px-6 text-left">Téléphone</th>
+                            <th class="py-3 px-6 text-center">Statut</th>
+                            <th class="py-3 px-6 text-center">Actions</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        @foreach($companies as $company)
-                            <tr>
-                                <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                                    {{-- CORRIGÉ : Le lien doit appeler companies.select --}}
-                                    <a href="{{ route('companies.select', $company->id) }}">
-                                        @if($company->logo)
-                                            <img src="{{ asset('storage/companies/logos/' . $company->logo) }}" alt="{{ $company->name ?? 'Logo' }}" class="w-10 h-10 rounded-full object-cover">
-                                        @else
-                                            <div class="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center text-gray-600 text-xs">N/A</div>
-                                        @endif
-                                    </a>
+                    <tbody class="text-gray-600 text-sm font-light">
+                        @foreach ($companies as $company)
+                            <tr class="border-b border-gray-200 hover:bg-gray-50">
+                                <td class="py-3 px-6 text-left whitespace-nowrap">{{ $company->name }}</td>
+                                <td class="py-3 px-6 text-left">{{ $company->email ?? 'N/A' }}</td>
+                                <td class="py-3 px-6 text-left">{{ $company->phone ?? 'N/A' }}</td>
+                                <td class="py-3 px-6 text-center">
+                                    <span class="relative inline-block px-3 py-1 font-semibold leading-tight">
+                                        <span aria-hidden="true" class="absolute inset-0 opacity-50 rounded-full {{ $company->is_active ? 'bg-green-200' : 'bg-red-200' }}"></span>
+                                        <span class="relative">{{ $company->is_active ? 'Actif' : 'Inactif' }}</span>
+                                    </span>
                                 </td>
-                                <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                                    {{-- CORRIGÉ : Le lien doit appeler companies.select --}}
-                                    <a href="{{ route('companies.select', $company->id) }}" class="text-blue-600 hover:text-blue-900 font-semibold">
-                                        <p class="text-gray-900 whitespace-no-wrap">{{ $company->name ?? '' }}</p>
-                                    </a>
-                                </td>
-                                <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                                    <p class="text-gray-900 whitespace-no-wrap">{{ $company->email ?? 'N/A' }}</p>
-                                </td>
-                                <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                                    <p class="text-gray-900 whitespace-no-wrap">{{ $company->phone ?? 'N/A' }}</p>
-                                </td>
-                                <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                                    @if(isset($company->is_active) && $company->is_active)
-                                        <span class="relative inline-block px-3 py-1 font-semibold text-green-900 leading-tight">
-                                            <span aria-hidden class="absolute inset-0 bg-green-200 opacity-50 rounded-full"></span>
-                                            <span class="relative">Actif</span>
-                                        </span>
-                                    @else
-                                        <span class="relative inline-block px-3 py-1 font-semibold text-red-900 leading-tight">
-                                            <span aria-hidden class="absolute inset-0 bg-red-200 opacity-50 rounded-full"></span>
-                                            <span class="relative">Inactif</span>
-                                        </span>
-                                    @endif
-                                </td>
-                                <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                                    <a href="{{ route('companies.show', $company) }}" class="text-indigo-600 hover:text-indigo-900 mr-3">Voir</a>
-                                    <a href="{{ route('companies.edit', $company) }}" class="text-yellow-600 hover:text-yellow-900 mr-3">Modifier</a>
-                                    <form action="{{ route('companies.destroy', $company) }}" method="POST" class="inline-block" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette entreprise ?');">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="text-red-600 hover:text-red-900">Supprimer</button>
-                                    </form>
+                                <td class="py-3 px-6 text-center">
+                                    <div class="flex item-center justify-center space-x-2">
+                                        {{-- MODIFICATION ICI: Ajout du lien vers le dashboard de l'entreprise --}}
+                                        <a href="{{ route('companies.select', $company) }}" class="w-6 h-6 transform hover:text-purple-500 hover:scale-110" title="Accéder au tableau de bord de {{ $company->name }}">
+                                            <!-- Icone Vue/Dashboard de l'entreprise -->
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 6.943a1.994 1.994 0 010 .114C20.268 16.057 16.477 19 12 19c-4.478 0-8.268-2.943-9.542-6.943a1.994 1.994 0 010-.114z" />
+                                            </svg>
+                                        </a>
+                                        <a href="{{ route('manage.companies.edit', $company) }}" class="w-6 h-6 transform hover:text-blue-500 hover:scale-110" title="Éditer {{ $company->name }}">
+                                            <!-- Icone Éditer -->
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                            </svg>
+                                        </a>
+                                        <form action="{{ route('manage.companies.destroy', $company) }}" method="POST" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette entreprise ?');" class="inline-block">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="w-6 h-6 transform hover:text-red-500 hover:scale-110" title="Supprimer {{ $company->name }}">
+                                                <!-- Icone Supprimer -->
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                </svg>
+                                            </button>
+                                        </form>
+                                    </div>
                                 </td>
                             </tr>
                         @endforeach
                     </tbody>
                 </table>
             </div>
-        @else
-            {{-- Ce bloc s'affiche si $companies n'est pas défini du tout (par exemple, si le contrôleur ne le passe pas) --}}
-            <div class="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded relative" role="alert">
-                <span class="block sm:inline">Aucune donnée d'entreprise disponible.</span>
-            </div>
         @endif
     </div>
-
-    <!-- Script files (si nécessaire pour Tabler ou d'autres fonctionnalités JS) -->
-    <script src="{{ asset('dist/js/tabler.min.js') }}" defer></script>
 </body>
 </html>

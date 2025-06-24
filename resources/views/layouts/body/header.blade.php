@@ -10,32 +10,85 @@
             </a>
         </h1>
 
+        {{-- Conteneur pour les éléments de la barre de navigation à droite --}}
         <div class="navbar-nav flex-row order-md-last">
+            {{-- Menu déroulant principal de l'utilisateur (à droite) --}}
             <div class="nav-item dropdown">
                 <a href="#" class="nav-link d-flex lh-1 text-reset p-0" data-bs-toggle="dropdown" aria-label="Open user menu">
                     <span class="avatar avatar-sm shadow-none"
-                          style="background-image: url({{ Avatar::create(Auth::user()->name)->toBase64() }})">
+                        style="background-image: url({{ Auth::user()->photo ? asset('storage/profiles/' . Auth::user()->photo) : asset('assets/images/default.png') }})">
                     </span>
                     <div class="d-none d-xl-block ps-2">
                         <div>{{ Auth::user()->name }}</div>
+                        {{-- Affichage du rôle de l'utilisateur --}}
+                        <div class="mt-1 small text-muted">
+                            @if(Auth::user()->isAdminPrincipal())
+                                Administrateur Principal
+                            @elseif(Auth::user()->isSecondaryUser())
+                                {{ implode(', ', Auth::user()->getRoleNames()->toArray()) }} <!-- Affiche les rôles (gestion, vente) -->
+                            @else
+                                Utilisateur
+                            @endif
+                        </div>
                     </div>
                 </a>
 
-                <div class="dropdown-menu">
-                    <a href="{{ route('profile.edit') }}" class="dropdown-item">
+                <div class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
+                    {{-- Informations sur la licence --}}
+                    @if (Auth::user()->licence)
+                        <h6 class="dropdown-header">Votre Licence</h6>
+                        <div class="dropdown-item-text">
+                            Plan: <strong>{{ Auth::user()->licence->licencePlan->name }}</strong>
+                            @if(Auth::user()->licence->licencePlan->plan_type === \App\Models\LicencePlan::PLAN_TRIAL)
+                                (Essai)
+                            @endif
+                            <br>
+                            Statut: <span class="badge {{ Auth::user()->licence->isActive() ? 'bg-green-lt' : 'bg-red-lt' }}">
+                                {{ Auth::user()->licence->status }}
+                            </span>
+                            <br>
+                            Expire le: {{ \Carbon\Carbon::parse(Auth::user()->licence->end_date)->format('d/m/Y') }}
+                        </div>
+
+                        {{-- Lien pour choisir un nouveau plan si essai expiré/inactif --}}
+                        @if(Auth::user()->licence->licencePlan->plan_type === \App\Models\LicencePlan::PLAN_TRIAL && !Auth::user()->licence->isActive())
+                            <div class="dropdown-divider"></div>
+                            <a href="{{ route('choose-license') }}" class="dropdown-item text-danger">
+                                Votre essai est terminé ! Choisir un plan payant
+                            </a>
+                        @elseif(Auth::user()->licence->isActive())
+                             <div class="dropdown-divider"></div>
+                            <a href="{{ route('choose-license') }}" class="dropdown-item">
+                                Gérer mon abonnement
+                            </a>
+                        @endif
+                    @else
+                        {{-- Si l'utilisateur n'a pas de licence du tout --}}
+                        @if(Auth::user()->isAdminPrincipal())
+                            <h6 class="dropdown-header">Licence</h6>
+                            <a href="{{ route('choose-license') }}" class="dropdown-item text-primary">
+                                Activer ma licence maintenant
+                            </a>
+                        @endif
+                    @endif
+
+                    <div class="dropdown-divider"></div>
+                    <a class="dropdown-item" href="{{ route('profile.edit') }}">
                         <svg xmlns="http://www.w3.org/2000/svg" class="icon dropdown-item-icon icon-tabler icon-tabler-settings" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
                             <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
                             <path d="M10.325 4.317c.426 -1.756 2.924 -1.756 3.35 0a1.724 1.724 0 0 0 2.573 1.066c1.543 -.94 3.31 .826 2.37 2.37a1.724 1.724 0 0 0 1.065 2.572c1.756 .426 1.756 2.924 0 3.35a1.724 1.724 0 0 0 -1.066 2.573c.94 1.543 -.826 3.31 -2.37 2.37a1.724 1.724 0 0 0 -2.572 1.065c-.426 1.756 -2.924 1.756 -3.35 0a1.724 1.724 0 0 0 -2.573 -1.066c-1.543 .94 -3.31 -.826 -2.37 -2.37a1.724 1.724 0 0 0 -1.065 -2.572c-1.756 -.426 -1.756 -2.924 0 -3.35a1.724 1.724 0 0 0 1.066 -2.573c-.94 -1.543 .826 -3.31 2.37 -2.37c1 .608 2.296 .07 2.572 -1.065z"></path>
                             <path d="M12 12m-3 0a3 3 0 1 0 6 0a3 3 0 1 0 -6 0"></path>
                         </svg>
-                        Compte
+                        {{ __('Mon Profil') }}
                     </a>
-                    <form action="{{ route('logout') }}" method="post">
+                    <a class="dropdown-item" href="{{ route('logout') }}"
+                       onclick="event.preventDefault();
+                                 document.getElementById('logout-form').submit();">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon dropdown-item-icon icon-tabler icon-tabler-logout" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M14 8v-2a2 2 0 0 0 -2 -2h-7a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h7a2 2 0 0 0 2 -2v-2" /><path d="M9 12h12l-3 -3" /><path d="M18 15l3 -3" /></svg>
+                        {{ __('Déconnexion') }}
+                    </a>
+                    <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
                         @csrf
-                        <button type="submit" class="dropdown-item">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="icon dropdown-item-icon icon-tabler icon-tabler-logout" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M14 8v-2a2 2 0 0 0 -2 -2h-7a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h7a2 2 0 0 0 2 -2v-2" /><path d="M9 12h12l-3 -3" /><path d="M18 15l3 -3" /></svg>
-                            Déconnexion
-                        </button>
                     </form>
                 </div>
             </div>

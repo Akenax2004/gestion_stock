@@ -16,14 +16,16 @@ class LicencePlanSeeder extends Seeder
         LicencePlan::firstOrCreate(
             ['plan_type' => LicencePlan::PLAN_TRIAL],
             [
-                'name' => 'Essai Gratuit (30 jours)',
+                'name' => 'Essai Gratuit (15 jours)', // Mis à jour pour 15 jours
                 'duration_type' => LicencePlan::DURATION_TRIAL,
-                'duration_days' => 30, // 30 jours d'essai
+                'duration_days' => 15, // 15 jours d'essai
                 'price_xof' => 0,
                 'max_companies' => 3, // Exemple: l'essai permet de gérer 3 entreprises
+                'max_users_per_company' => 2, // Mis à jour: 2 utilisateurs par entreprise pour l'essai
                 'features' => [
                     'Toutes les fonctionnalités de base',
                     'Jusqu\'à 3 entreprises',
+                    'Jusqu\'à 2 utilisateurs par entreprise', // Ajouté dans les fonctionnalités
                     'Rapports standards'
                 ],
             ]
@@ -38,7 +40,13 @@ class LicencePlanSeeder extends Seeder
                 'duration_days' => 30,
                 'price_xof' => 5000,
                 'max_companies' => 1,
-                'features' => ['Gestion de stock de base', '1 entreprise', 'Support par email'],
+                'max_users_per_company' => 1, // Ajouté/Mis à jour: 1 utilisateur par entreprise
+                'features' => [
+                    'Gestion de stock de base',
+                    '1 entreprise',
+                    '1 utilisateur par entreprise', // Ajouté dans les fonctionnalités
+                    'Support par email'
+                ],
             ]
         );
 
@@ -50,7 +58,15 @@ class LicencePlanSeeder extends Seeder
                 'duration_days' => 365,
                 'price_xof' => 150000,
                 'max_companies' => 10,
-                'features' => ['Toutes les fonctionnalités Basiques', 'Jusqu\'à 10 entreprises', 'Alertes avancées', 'Rapports détaillés', 'Support prioritaire'],
+                'max_users_per_company' => 3, // Ajouté/Mis à jour: 3 utilisateurs par entreprise
+                'features' => [
+                    'Toutes les fonctionnalités Basiques',
+                    'Jusqu\'à 10 entreprises',
+                    'Jusqu\'à 3 utilisateurs par entreprise', // Ajouté dans les fonctionnalités
+                    'Alertes avancées',
+                    'Rapports détaillés',
+                    'Support prioritaire'
+                ],
             ]
         );
 
@@ -62,7 +78,16 @@ class LicencePlanSeeder extends Seeder
                 'duration_days' => 365,
                 'price_xof' => 400000,
                 'max_companies' => -1, // Illimité
-                'features' => ['Toutes les fonctionnalités Standard', 'Nombre illimité d\'entreprises', 'Intégrations API', 'Personnalisation', 'Formation dédiée', 'Support 24/7'],
+                'max_users_per_company' => 5, // Ajouté/Mis à jour: 5 utilisateurs par entreprise
+                'features' => [
+                    'Toutes les fonctionnalités Standard',
+                    'Nombre illimité d\'entreprises',
+                    'Jusqu\'à 5 utilisateurs par entreprise', // Ajouté dans les fonctionnalités
+                    'Intégrations API',
+                    'Personnalisation',
+                    'Formation dédiée',
+                    'Support 24/7'
+                ],
             ]
         );
     }
